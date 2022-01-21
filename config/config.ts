@@ -1,6 +1,7 @@
-require("dotenv").config()
+import dotenv from "dotenv"
+dotenv.config()
 
-module.exports = {
+const DATABASE =  {
   "development": {
     "username": process.env.DB_USER,
     "password": process.env.DB_PASS,
@@ -23,3 +24,18 @@ module.exports = {
     "dialect": "mysql"
   }
 }
+
+const SERVER_HOSTNAME = process.env.SERVER_HOSTNAME || "localhost"
+const SERVER_PORT = process.env.SERVER_PORT || 5000
+
+const SERVER = {
+  hostname: SERVER_HOSTNAME,
+  port: SERVER_PORT
+}
+
+const config = {
+  database: DATABASE,
+  server: SERVER
+}
+
+export = config

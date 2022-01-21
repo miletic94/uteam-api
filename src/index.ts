@@ -1,23 +1,22 @@
 
-import express, { Application, Request, Response } from "express";
+import express, { Application } from "express";
 import "dotenv/config"
-//@ts-ignore
+import config from "../config/config";
+
 import db from "../models"
+import healthCheckRoute from "../routes/healthCheck";
 
 const app:Application = express()
 app.use(express.json())
 
-const PORT:string = process.env.PORT || "5000"
 
 db.sequelize.sync().then(() => {
-    app.listen(PORT, () => {
-        console.log(`App is listening to port:${PORT}`)
+    app.listen(config.server.port, () => {
+        console.log(`App is listening to config.server.port:${config.server.port}`)
     })
 }) 
 
-app.get("*", (req:Request, res:Response) => {
-    res.json({message: "0K"})
-})
+app.use("/", healthCheckRoute)
 
 
 
