@@ -26,6 +26,10 @@ module.exports = (sequelize:any, DataTypes:any) => {
     static associate(models:any) {
       // define association here
     }
+
+    public toJSON() {
+        return {... this.get(), id: undefined}
+    }
   };
   User.init({
     id: {
@@ -38,7 +42,10 @@ module.exports = (sequelize:any, DataTypes:any) => {
     username: {
       type: DataTypes.STRING,
       allowNull: false,
-      unique: true
+      unique: true,
+      validate: {
+        is: /^[a-zA-Z](?:[0-9][#%-_*])*/
+      }
     },
     email: {
       type: DataTypes.STRING,
@@ -47,11 +54,15 @@ module.exports = (sequelize:any, DataTypes:any) => {
     },
     password: {
       type: DataTypes.STRING,
-      allowNull: false
+      allowNull: false,
+      validate: {
+        len: [6, 64]
+      }
     },
   }, {
     sequelize,
     modelName: 'User',
+    tableName: "users"
   });
   return User;
 };
