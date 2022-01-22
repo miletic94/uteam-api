@@ -49,15 +49,14 @@ const register = async (req:Request, res:Response, next:NextFunction) => {
 const login = async (req:Request, res:Response, next:NextFunction) => {
     const {username, email, password}:IUser = req.body
     try {
-        const users:IUser[] = username ? await db.User.findAll({where: {username}}):
-        email ? await db.User.findAll({where: {email}}):
+        const user:IUser= username ? await db.User.findOne({where: {username}}):
+        email ? await db.User.findOne({where: {email}}):
             undefined
-        if(users[0] == null) {
+        if(user == null) {
             return res.status(406).json({ // PRODUCTION??
                 message: "Can't find user"
             })
         }
-        const user = users[0]
 
         if (await bcrypt.compare(password, user.password)) {
             signJWT(user, (error, token) => {
