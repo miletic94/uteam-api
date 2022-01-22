@@ -26,11 +26,8 @@ $ npm start
 ```
 
 # Basic use
-All endpoints return JSON: 
-```
-{
-    message: OK
-}
-```
++ /register route needs username, email and password in request body. 
+It returns user that is inserted in database
 
-
++ /login route needs username OR email AND password
+If user is authenticated, app returns message: OK and JWT
