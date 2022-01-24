@@ -1,6 +1,6 @@
 import jwt from "jsonwebtoken"
 import config from "../config/config"
-import { IUser } from "../interfaces/IUser"
+import { IUser } from "../interfaces/user"
 
 const signJWT = (user:IUser, callback: (error: Error | null, token: string | null) => void):void => {
 

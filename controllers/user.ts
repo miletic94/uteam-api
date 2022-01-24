@@ -1,9 +1,10 @@
 import {Request, Response, NextFunction } from "express"
 import bcrypt from "bcrypt"
-import db from "../models"
-import { IUser } from "../interfaces/IUser"
+import { IUser } from "../interfaces/user"
 import signJWT from "../utils/signJWT"
 import { checkRegex } from "../utils/utils"
+
+import User from "../models/user"
 
 const register = async (req:Request, res:Response, next:NextFunction) => {
     let {username, email, password}:IUser = req.body
@@ -28,8 +29,9 @@ const register = async (req:Request, res:Response, next:NextFunction) => {
 
     try {
         const  hashedPassword = await bcrypt.hash(password, 10)
-        
-        const user = await db.User.create({
+        // Ako ima generic u Model<UserAttributes> onda izbacuje grešku kada se ovde ne implementira dobro. 
+        // U suprotnom ne reaguje
+        const user = await User.create({
             username: username,
             email: email,
             password: hashedPassword
@@ -48,10 +50,16 @@ const register = async (req:Request, res:Response, next:NextFunction) => {
 
 const login = async (req:Request, res:Response, next:NextFunction) => {
     const {username, email, password}:IUser = req.body
+    if(username == null && email == null) {
+        return res.status(400).json({
+            message: "You must enter email or password"
+        })
+    }
     try {
-        const user:IUser= username ? await db.User.findOne({where: {username}}):
-        email ? await db.User.findOne({where: {email}}):
-            undefined
+        const user = username ? 
+            await User.findOne({where: {username}}):
+            await User.findOne({where: {email}})
+
         if(user == null) {
             return res.status(406).json({ // PRODUCTION??
                 message: "Can't find user"
@@ -93,7 +101,7 @@ const login = async (req:Request, res:Response, next:NextFunction) => {
 //HELPER CONTROLLERS - NOT FOR PRODUCTION
 const getAll = async (req:Request, res:Response, next:NextFunction) => {
     try {
-        const users: IUser[] = await db.User.findAll()
+        const users = await User.findAll()
         res.json(users)
     } catch (error) {
         res.json({
@@ -104,7 +112,7 @@ const getAll = async (req:Request, res:Response, next:NextFunction) => {
 }
 
 const deleteAll = async (req:Request, res:Response, next:NextFunction) => {
-    await db.User.destroy({
+    await User.destroy({
         where: {},
         truncate: true
     })

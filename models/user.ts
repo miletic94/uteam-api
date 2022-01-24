@@ -1,7 +1,8 @@
 'use strict';
 import {
-  Model, UUIDV4
+  DataTypes, Model, Optional, UUIDV4
 } from 'sequelize'
+import { sequelize } from "./index"
 
 interface UserAttributes {
   id: string
@@ -10,8 +11,10 @@ interface UserAttributes {
   password: string
 }
 
-module.exports = (sequelize:any, DataTypes:any) => {
-  class User extends Model
+// Some attributes are optional in `User.build` and `User.create` calls
+interface UserCreationAttributes extends Optional<UserAttributes, "id"> {}
+
+  class User extends Model<UserAttributes, UserCreationAttributes>
     implements UserAttributes {
 
     id!: string
@@ -55,14 +58,11 @@ module.exports = (sequelize:any, DataTypes:any) => {
     password: {
       type: DataTypes.STRING,
       allowNull: false,
-      validate: {
-        len: [6, 64]
-      }
     },
   }, {
     sequelize,
     modelName: 'User',
     tableName: "users"
   });
-  return User;
-};
+
+  export = User
