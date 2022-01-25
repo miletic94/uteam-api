@@ -27,10 +27,15 @@ const DATABASE =  {
 
 const SERVER_HOSTNAME = process.env.SERVER_HOSTNAME || "localhost"
 const SERVER_PORT = process.env.SERVER_PORT || 5000
+const SERVER_TOKEN_SECRET = process.env.SERVER_TOKEN_SECRET
+
 
 const SERVER = {
   hostname: SERVER_HOSTNAME,
-  port: SERVER_PORT
+  port: SERVER_PORT,
+  token: {
+    secret: SERVER_TOKEN_SECRET
+  }
 }
 
 const config = {
