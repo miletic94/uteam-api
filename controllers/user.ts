@@ -5,6 +5,7 @@ import signJWT from "../utils/signJWT"
 import { checkRegex } from "../utils/utils"
 
 import User from "../models/user"
+import Profile from "../models/profile"
 
 const register = async (req:Request, res:Response, next:NextFunction) => {
     let {username, email, password}:IUser = req.body
@@ -110,13 +111,23 @@ const getAll = async (req:Request, res:Response, next:NextFunction) => {
     }
     
 }
-
-const deleteAll = async (req:Request, res:Response, next:NextFunction) => {
+const deleteOne = async (req:Request, res:Response, next:NextFunction) => {
+    const userUuid = req.params.id
+    console.log(userUuid);
     await User.destroy({
-        where: {},
-        truncate: true
+        where: {userUuid},
+        truncate: false
     })
     next()
 }
 
-export {register, login, getAll, deleteAll}
+
+const deleteAll = async (req:Request, res:Response, next:NextFunction) => {
+    await User.destroy({
+        where: {},
+        // truncate: true
+    })
+    next()
+}
+
+export {register, login, getAll, deleteAll, deleteOne}

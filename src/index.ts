@@ -5,12 +5,12 @@ import { sequelize } from "../models";
 
 import healthCheckRoute from "../routes/healthCheck";
 import userRoutes from "../routes/user"
+import profileRoutes from "../routes/profile"
 
 const app:Application = express()
 app.use(express.json())
 
-app.use("/", healthCheckRoute)
-app.use("/", userRoutes)
+app.use("/", [healthCheckRoute, userRoutes, profileRoutes])
 
 sequelize.sync({force:true}).then(() => {
     app.listen(config.server.port, () => {
