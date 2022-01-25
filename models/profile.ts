@@ -8,6 +8,7 @@ import User from "./user"
 import { Status } from "../interfaces/profile"
 
 interface ProfileAttributes {
+  id: number
   profileUuid: string
   status: Status
   name: string
@@ -16,9 +17,11 @@ interface ProfileAttributes {
 
 }
 interface ProfileCreationAttributes extends Optional<ProfileAttributes, "profileUuid"> {}
+interface OptionalAttributes extends Optional<ProfileCreationAttributes, "id"> {}
 
-  class Profile extends Model<ProfileAttributes, ProfileCreationAttributes>
+  class Profile extends Model<ProfileCreationAttributes, OptionalAttributes>
     implements ProfileAttributes {
+        id!:number
         profileUuid!: string;
         status!: Status
         name!: string
@@ -29,13 +32,19 @@ interface ProfileCreationAttributes extends Optional<ProfileAttributes, "profile
             return {...
               this.get(), 
               id: undefined, 
-              userId: undefined,
               createdAt: undefined,
               updatedAt: undefined
             }
         }
   };
   Profile.init({
+    id: {
+      type: DataTypes.INTEGER,
+      autoIncrement:true,
+      allowNull: false,
+      primaryKey: true,
+      unique: true
+    },
     profileUuid: {
       type: DataTypes.UUID,
       defaultValue: DataTypes.UUIDV4,
