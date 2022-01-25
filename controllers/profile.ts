@@ -131,8 +131,8 @@ const deleteProfile = async (req:Request, res:Response, next:NextFunction) => {
                 profileUuid: uuid
             }
         })
-        res.json({
-            message: "Profile deleted"
+        return res.json({
+            message: "Profile deleted if existed"
         })
     } catch (error) {
         res.json({
