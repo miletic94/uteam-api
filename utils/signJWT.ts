@@ -21,7 +21,6 @@ const signJWT = (user:IUser, callback: (error: Error | null, token: string | nul
             }
         } )
     } catch (error) {
-        console.error(error.message, error)
         callback(error, null)
     }
 }

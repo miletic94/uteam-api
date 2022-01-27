@@ -8,4 +8,5 @@ export interface IProfile {
     name: string
     profilePhoto: string
     userUuid?: string
+    companyUuid?: string
 }

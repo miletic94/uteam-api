@@ -1,14 +1,13 @@
 import {Request, Response, NextFunction } from "express"
 import bcrypt from "bcrypt"
-import { IUser } from "../interfaces/user"
+import { IUser, Role } from "../interfaces/user"
 import signJWT from "../utils/signJWT"
 import { checkRegex } from "../utils/utils"
 
 import User from "../models/user"
-import Profile from "../models/profile"
 
 const register = async (req:Request, res:Response, next:NextFunction) => {
-    let {username, email, password}:IUser = req.body
+    let {username, email, password, role}:IUser = req.body
 
     if(username == null || email == null || password == null ) {
         return res.status(400).json({
@@ -28,6 +27,10 @@ const register = async (req:Request, res:Response, next:NextFunction) => {
         })
     }
 
+    if(role == null || (!Object.values(Role).includes(role))) {
+        role = Role.USER
+    }
+
     try {
         const  hashedPassword = await bcrypt.hash(password, 10)
         // Ako ima generic u Model<UserAttributes> onda izbacuje grešku kada se ovde ne implementira dobro. 
@@ -35,14 +38,14 @@ const register = async (req:Request, res:Response, next:NextFunction) => {
         const user = await User.create({
             username: username,
             email: email,
-            password: hashedPassword
+            password: hashedPassword,
+            role
         })
 
         res.status(201).json(user)
 
     } catch(error) {
-        console.error(error)
-        return res.json({
+        return res.status(500).json({
             message: error.message,
             error
         })
@@ -89,7 +92,6 @@ const login = async (req:Request, res:Response, next:NextFunction) => {
         }
 
     } catch (error) {
-        console.error(error)
         res.status(500).json({
             message: error.message,
             error
@@ -105,7 +107,7 @@ const getAll = async (req:Request, res:Response, next:NextFunction) => {
         const users = await User.findAll()
         res.json(users)
     } catch (error) {
-        res.json({
+        res.status(500).json({
             message: error.message
         })
     }
