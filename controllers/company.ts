@@ -2,6 +2,7 @@ import {Request, Response, NextFunction } from "express"
 import slugify from "slugify"
 import { ICompany } from "../interfaces/company"
 import Company from "../models/company"
+import Profile from "../models/profile"
 
 const createCompany = async (req:Request, res:Response, next:NextFunction) => {
     let {name, logo }:ICompany = req.body
@@ -36,7 +37,8 @@ const createCompany = async (req:Request, res:Response, next:NextFunction) => {
 const getAllCompanies = async (req:Request, res:Response, next:NextFunction) => {
     try {
         const {rows:companies} = await Company.findAndCountAll({
-            limit:20
+            limit:20,
+            include: {model:Profile, as:"profiles"}
         })
         res.json(companies)
     } catch (error) {
@@ -53,7 +55,8 @@ const getOneCompany = async (req:Request, res:Response, next:NextFunction) => {
         const company = await Company.findOne({
             where: {
                 companyUuid: uuid
-            }
+            },
+            include: {model:Profile, as:"profiles"}
         })
         if(company == null) {
             return res.status(406).json({
