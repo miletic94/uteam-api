@@ -5,6 +5,7 @@ import signJWT from "../utils/signJWT"
 import { checkRegex } from "../utils/utils"
 
 import User from "../models/user"
+import Profile from "../models/profile"
 
 const register = async (req:Request, res:Response, next:NextFunction) => {
     let {username, email, password, role}:IUser = req.body
@@ -104,7 +105,10 @@ const login = async (req:Request, res:Response, next:NextFunction) => {
 //HELPER CONTROLLERS - NOT FOR PRODUCTION
 const getAll = async (req:Request, res:Response, next:NextFunction) => {
     try {
-        const users = await User.findAll()
+        const users = await User.findAll({
+            include: [{model: Profile, as: "profile"}]
+        }
+        )
         res.json(users)
     } catch (error) {
         res.status(500).json({

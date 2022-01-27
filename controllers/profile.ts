@@ -66,8 +66,9 @@ const getOneProfile = async (req:Request, res:Response, next:NextFunction) => {
     try {
         const profile = await Profile.findOne({
             where: {
-                profileUuid: uuid
-            }
+                profileUuid: uuid,
+            },
+            include:[{model:User, as: "user"}, {model:Company, as: "company"}]
         })
         if(profile == null) {
             return res.status(406).json({
