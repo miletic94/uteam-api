@@ -1,15 +1,16 @@
 'use strict';
 import {
-  DataTypes, Model, Optional, UUIDV4
+  DataTypes, Model, Optional
 } from 'sequelize'
 import { sequelize } from "./index"
+import { Role } from "../interfaces/user"
 
 interface UserAttributes {
   userUuid: string
-  id: number
   username: string
   email: string
   password: string
+  role: Role
 }
 
 
@@ -17,33 +18,26 @@ interface UserAttributes {
 // Some attributes are optional in `User.build` and `User.create` calls
 // CAN THIS BE DONE DIFFERENTLY
 interface UserCreationAttributes extends Optional<UserAttributes, "userUuid"> {}
-interface OptionalAttributes extends Optional<UserCreationAttributes, "id"> {}
 
-  class User extends Model<UserCreationAttributes, OptionalAttributes>
+  class User extends Model<UserAttributes, UserCreationAttributes>
     implements UserAttributes {
     userUuid!: string;
     id!: number
     username!:string
     email!:string
     password!: string
+    role!: Role
 
     public toJSON() {
         return {...
           this.get(), 
           id: undefined, 
           createdAt: undefined,
-           updatedAt: undefined
+          updatedAt: undefined
         }
     }
   };
   User.init({
-    id: {
-      type: DataTypes.INTEGER,
-      autoIncrement:true,
-      allowNull: false,
-      primaryKey: true,
-      unique: true
-    },
     userUuid: {
       type: DataTypes.UUID,
       defaultValue: DataTypes.UUIDV4,
@@ -66,6 +60,11 @@ interface OptionalAttributes extends Optional<UserCreationAttributes, "id"> {}
       type: DataTypes.STRING,
       allowNull: false,
     },
+    role: {
+      type: DataTypes.ENUM,
+      values: Object.values(Role),
+      defaultValue: Role.USER
+    }
   }, {
     sequelize,
     modelName: 'User',

@@ -5,46 +5,43 @@ import {
 import { sequelize } from "./index"
 
 import User from "./user"
+import Company from "./company"
 import { Status } from "../interfaces/profile"
 
 interface ProfileAttributes {
-  id: number
   profileUuid: string
   status: Status
   name: string
   profilePhoto: string
   userId: number
-
+  companyId: number | null
 }
+
 interface ProfileCreationAttributes extends Optional<ProfileAttributes, "profileUuid"> {}
-interface OptionalAttributes extends Optional<ProfileCreationAttributes, "id"> {}
+interface OptionalAttributes extends Optional<ProfileCreationAttributes, "companyId"> {}
 
   class Profile extends Model<ProfileCreationAttributes, OptionalAttributes>
     implements ProfileAttributes {
-        id!:number
         profileUuid!: string;
         status!: Status
         name!: string
         profilePhoto!: string
         userId!: number
+        companyId!: number | null
+
 
         public toJSON() {
             return {...
               this.get(), 
               id: undefined, 
+              userId: undefined,
+              companyId: undefined,
               createdAt: undefined,
               updatedAt: undefined
             }
         }
   };
   Profile.init({
-    id: {
-      type: DataTypes.INTEGER,
-      autoIncrement:true,
-      allowNull: false,
-      primaryKey: true,
-      unique: true
-    },
     profileUuid: {
       type: DataTypes.UUID,
       defaultValue: DataTypes.UUIDV4,
@@ -71,7 +68,12 @@ interface OptionalAttributes extends Optional<ProfileCreationAttributes, "id"> {
         type: DataTypes.INTEGER,
         unique: true,
         allowNull: false
-    }
+    },
+    companyId: {
+      type: DataTypes.INTEGER,
+      unique: true,
+      allowNull: true
+  }
   }, {
     sequelize,
     modelName: 'Profile',
@@ -85,9 +87,17 @@ interface OptionalAttributes extends Optional<ProfileCreationAttributes, "id"> {
     as: "user"
   })
   User.hasOne(Profile, {
-    onDelete: "CASCADE",
-    onUpdate: "CASCADE",
     foreignKey: "userId",
+    as: "profile"
   })
 
+  Profile.belongsTo(Company, {
+    as: "company",
+    onDelete: "SET NULL"
+  })
+  Company.hasMany(Profile, {
+    as: "profiles",
+    foreignKey: "companyId"
+  })
+  
   export = Profile
