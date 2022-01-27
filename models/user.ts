@@ -5,41 +5,48 @@ import {
 import { sequelize } from "./index"
 
 interface UserAttributes {
-  id: string
+  userUuid: string
+  id: number
   username: string
   email: string
   password: string
 }
 
+
+
 // Some attributes are optional in `User.build` and `User.create` calls
-interface UserCreationAttributes extends Optional<UserAttributes, "id"> {}
+// CAN THIS BE DONE DIFFERENTLY
+interface UserCreationAttributes extends Optional<UserAttributes, "userUuid"> {}
+interface OptionalAttributes extends Optional<UserCreationAttributes, "id"> {}
 
-  class User extends Model<UserAttributes, UserCreationAttributes>
+  class User extends Model<UserCreationAttributes, OptionalAttributes>
     implements UserAttributes {
-
-    id!: string
+    userUuid!: string;
+    id!: number
     username!:string
     email!:string
     password!: string
-    /**
-    * Helper method for defining associations.
-    * This method is not a part of Sequelize lifecycle.
-    * The `models/index` file will call this method automatically.
-    */
-    static associate(models:any) {
-      // define association here
-    }
 
     public toJSON() {
-        return {... this.get(), id: undefined}
+        return {...
+          this.get(), 
+          id: undefined, 
+          createdAt: undefined,
+           updatedAt: undefined
+        }
     }
   };
   User.init({
     id: {
-      type: DataTypes.UUID,
-      defaultValue: UUIDV4,
+      type: DataTypes.INTEGER,
+      autoIncrement:true,
       allowNull: false,
       primaryKey: true,
+      unique: true
+    },
+    userUuid: {
+      type: DataTypes.UUID,
+      defaultValue: DataTypes.UUIDV4,
       unique: true
     },
     username: {
