@@ -16,12 +16,15 @@ async function getCompanyId(uuid:string | undefined, callback: (uuid:string | un
         const company = await callback(uuid)
         if(company == null) {
             console.error("Can't find company")
-            return company
+            return null
         }
         return company.id
     }
     return companyId
 }
 
+const capitalize = (string:string) => {
+    return string.charAt(0) + string.slice(1)
+}
 
-export { checkRegex, getCompanyId }
+export { checkRegex, getCompanyId, capitalize }

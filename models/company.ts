@@ -62,4 +62,4 @@ interface CompanyCreationAttributes extends Optional<CompanyAttributes, "company
     tableName: "companies"
   });
 
-  export = Company
+  export = Company 

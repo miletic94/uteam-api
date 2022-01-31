@@ -1,48 +1,30 @@
 import {Request, Response, NextFunction } from "express"
 import bcrypt from "bcrypt"
-import { IUser, Role } from "../interfaces/user"
+import { ICollectedUserData, IUser, Role } from "../interfaces/user"
 import signJWT from "../utils/signJWT"
 import { checkRegex } from "../utils/utils"
+import  passport  from "passport"
 
 import User from "../models/user"
 import Profile from "../models/profile"
 
+import {initializeLocalStrategy} from "../strategies/local"
+import Company from "../models/company"
+import { ICollectedCompanyData } from "../interfaces/company"
+
 const register = async (req:Request, res:Response, next:NextFunction) => {
-    let {username, email, password, role}:IUser = req.body
-
-    if(username == null || email == null || password == null ) {
-        return res.status(400).json({
-            message: "Must enter username, email, and password"
-        })
-    }
+    let {username, email, password, role}:ICollectedUserData = req.body.user
     
-    if(!checkRegex(/^[a-zA-Z](?:[0-9][#%-_*])*/, username)) {
-        return res.status(400).json({
-            message: "Username starts with character, contains characters, numbers and any of this symbols: #, %, -, _, *. Choose wisely"
-        })
-    }
-
-    if(password.length < 6) {
-        return res.status(400).json({
-            message: "Password must be at least 6 characters long"
-        })
-    }
-
-    if(role == null || (!Object.values(Role).includes(role))) {
-        role = Role.USER
-    }
-
     try {
-        const  hashedPassword = await bcrypt.hash(password, 10)
         // Ako ima generic u Model<UserAttributes> onda izbacuje grešku kada se ovde ne implementira dobro. 
         // U suprotnom ne reaguje
         const user = await User.create({
             username: username,
             email: email,
-            password: hashedPassword,
+            password,
             role
         })
-
+        const userId = user.id
         res.status(201).json(user)
 
     } catch(error) {
@@ -53,25 +35,38 @@ const register = async (req:Request, res:Response, next:NextFunction) => {
     }
 }
 
+
 const login = async (req:Request, res:Response, next:NextFunction) => {
-    const {username, email, password}:IUser = req.body
+    const {username, email}:IUser = req.body
     if(username == null && email == null) {
         return res.status(400).json({
             message: "You must enter email or password"
         })
     }
-    try {
-        const user = username ? 
-            await User.findOne({where: {username}}):
-            await User.findOne({where: {email}})
-
-        if(user == null) {
-            return res.status(406).json({ // PRODUCTION??
-                message: "Can't find user"
+    if(username) {
+        initializeLocalStrategy("username", passport, (username) => {
+            const _user = User.findOne({
+                where: {
+                    username
+                }
             })
+            return _user
+        })
+    } else if (email) {
+        initializeLocalStrategy("email", passport, (email) => {
+            const _user = User.findOne({
+                where: {
+                    email
+                }
+            })
+            return _user
+        })
+    }
+    passport.authenticate("local", (error, user:IUser, info) => {
+        if(error) {
+            return res.status(500).json(error)
         }
-
-        if (await bcrypt.compare(password, user.password)) {
+        if(user) {
             signJWT(user, (error, token) => {
                 if(error) {
                     return res.status(500).json({
@@ -80,26 +75,18 @@ const login = async (req:Request, res:Response, next:NextFunction) => {
                     })
                 }
                 if(token) {
-                    return res.status(200).json({
+                    res.json({
                         message: "OK",
-                        token
+                        token: `Bearer ${token}`
                     })
-                }
+                } 
             })
         } else {
-            res.status(403).json({
-                message: "Not Allowed"
-            })
+            return res.json(info)
         }
-
-    } catch (error) {
-        res.status(500).json({
-            message: error.message,
-            error
-        })
-    }
-
+    })(req, res, next)
 }
+
 
 
 //HELPER CONTROLLERS - NOT FOR PRODUCTION

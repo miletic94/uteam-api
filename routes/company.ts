@@ -4,7 +4,7 @@ import {
     getOneCompany,
     updateCompany, deleteCompany
 } from "../controllers/company"
-getOneCompany
+
 const router = express.Router()
 
 router.get("/companies", getAllCompanies)
