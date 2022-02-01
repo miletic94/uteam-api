@@ -3,7 +3,7 @@ import { IProfile, Status } from "../interfaces/profile"
 import Company from "../models/company"
 import Profile from "../models/profile"
 import User from "../models/user"
-import { getCompanyId } from "../utils/utils"
+import { getIdFromUuid } from "../utils/utils"
 
 const createProfile = async (req:Request, res:Response, next:NextFunction) => {
     const { status, name, profilePhoto, userUuid, companyUuid }:IProfile = req.body 
@@ -13,27 +13,23 @@ const createProfile = async (req:Request, res:Response, next:NextFunction) => {
         })
     }
     try {
-        const user = await User.findOne({
-            where: {userUuid}
-        })
-        if(user == null) {
-            return res.status(406).json({
-                message: "User with specific ID was not found" // PRODUCTION
-            })
-        }
-        const companyId = await getCompanyId(companyUuid, (companyUuid) => {
-            const company =Company.findOne({
-                where: {
-                    companyUuid
-                }
-            })
-            return company
-        })
+        const userId = await getIdFromUuid(
+            userUuid,
+            (userUuid) => {
+                return User.findOne({where: {userUuid}}) 
+            }
+        ) as number // Function is set up to throw error if null is return value, and allow Null
+        const companyId = await getIdFromUuid(
+            companyUuid, 
+            (companyUuid) => {
+            return Company.findOne({where: {companyUuid}})
+        }, 
+        true)
         const profile = await Profile.create({
             status,
             name,
             profilePhoto,
-            userId: user.id,
+            userId,
             companyId
         })
         res.status(201).json(profile)
@@ -89,15 +85,15 @@ const updateProfile = async (req:Request, res:Response, next:NextFunction) => {
     let {name, profilePhoto, status}:IProfile = req.body
 
     const companyUuid:string | undefined = req.body.companyId
-    // ABSTRACT THIS???
-    const companyId = await getCompanyId(companyUuid, (companyUuid) => {
+    
+    const companyId = await getIdFromUuid(companyUuid, (companyUuid) => {
         const company =Company.findOne({
             where: {
                 companyUuid
             }
         })
         return company
-    })
+    }, true)
 
 
     if(name == null) {

@@ -5,26 +5,32 @@ const checkRegex = (regex: RegExp, text:string) => {
     return regex.test(text)
 }
 
-// GENERALISE??
-async function getCompanyId(uuid:string | undefined, callback: (uuid:string | undefined) => Promise<ICompany | null>):Promise<number | null> {
+async function getIdFromUuid<T extends {id:number}>(uuid:string | undefined, callback: (uuid:string | undefined) => Promise<T | null>, allowNull:boolean = false):Promise<number | null> {
 
-    let companyId
     if(uuid=== undefined) {
-        companyId = null
-        console.log("Com NULL")
-    } else {
-        const company = await callback(uuid)
-        if(company == null) {
-            console.error("Can't find company")
+        if(allowNull) {
+            console.log("getIdFromUuid: Uuid is undefined")
             return null
+        } else {
+            throw "getIdFromUuid: Uuid is undefined. Id can't be null"
         }
-        return company.id
+    } else {
+        const model = await callback(uuid)
+        if(model == null) {
+            if(allowNull) {
+                console.error("getIdFromUuid: Can't find wanted model. Callback returned 'null'")
+                return null
+            } else {
+                throw "getIdFromUuid: Can't find wanted model. Id can't be null"
+            }
+            
+        }
+        return model.id
     }
-    return companyId
 }
 
 const capitalize = (string:string) => {
     return string.charAt(0) + string.slice(1)
 }
 
-export { checkRegex, getCompanyId, capitalize }
+export { checkRegex, getIdFromUuid, capitalize }
