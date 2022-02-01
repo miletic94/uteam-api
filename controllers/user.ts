@@ -14,7 +14,11 @@ import { ICollectedCompanyData } from "../interfaces/company"
 
 const register = async (req:Request, res:Response, next:NextFunction) => {
     let {username, email, password, role}:ICollectedUserData = req.body.user
-    
+    if(username == null || email == null || password == null ) {
+        return res.status(400).json({
+            message: "Must enter username, email, and password"
+        })
+    }
     try {
         // Ako ima generic u Model<UserAttributes> onda izbacuje grešku kada se ovde ne implementira dobro. 
         // U suprotnom ne reaguje

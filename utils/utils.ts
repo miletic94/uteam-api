@@ -5,7 +5,7 @@ const checkRegex = (regex: RegExp, text:string) => {
     return regex.test(text)
 }
 
-async function getIdFromUuid<T extends {id:number}>(uuid:string | undefined, callback: (uuid:string | undefined) => Promise<T | null>, allowNull:boolean = false):Promise<number | null> {
+async function getIdFromUuid<T extends {id:number}>(uuid:string | undefined, callback: (uuid:string | undefined) => Promise<T | null>, allowNull:boolean = false) {
 
     if(uuid=== undefined) {
         if(allowNull) {

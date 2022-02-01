@@ -6,7 +6,7 @@ import User from "../models/user"
 import { getIdFromUuid } from "../utils/utils"
 
 const createProfile = async (req:Request, res:Response, next:NextFunction) => {
-    const { status, name, profilePhoto, userUuid, companyUuid }:IProfile = req.body 
+    const { status, name, profilePhoto, userUuid, companyUuid }:IProfile = req.body.profile 
     if(name == null || userUuid == null) {
         return res.status(400).json({
             message: "Must insert 'name' and 'userUuid' "
@@ -18,7 +18,7 @@ const createProfile = async (req:Request, res:Response, next:NextFunction) => {
             (userUuid) => {
                 return User.findOne({where: {userUuid}}) 
             }
-        ) as number // Function is set up to throw error if null is return value, and allow Null
+        ) as number // Function is set up to throw error if null is return value, and allow Null is set to false
         const companyId = await getIdFromUuid(
             companyUuid, 
             (companyUuid) => {
