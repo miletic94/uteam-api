@@ -1,24 +1,31 @@
 import {Request, Response, NextFunction } from "express"
-import bcrypt from "bcrypt"
-import { ICollectedUserData, IUser, Role } from "../interfaces/user"
+import { IUser } from "../interfaces/user"
 import signJWT from "../utils/signJWT"
-import { checkRegex } from "../utils/utils"
 import  passport  from "passport"
 
 import User from "../models/user"
 import Profile from "../models/profile"
 
 import {initializeLocalStrategy} from "../strategies/local"
-import Company from "../models/company"
-import { ICollectedCompanyData } from "../interfaces/company"
+import { IProfile } from "../interfaces/profile"
+
 
 const register = async (req:Request, res:Response, next:NextFunction) => {
-    let {username, email, password, role}:ICollectedUserData = req.body.user
+    let {username, email, password, role}:IUser = req.body.user
+    const { status, name:profileName, profilePhoto }:IProfile = req.body.profile 
+    let userId:number
+
     if(username == null || email == null || password == null ) {
         return res.status(400).json({
             message: "Must enter username, email, and password"
         })
     }
+    if(profileName == null) {
+        return res.status(400).json({
+            message: "Profile name can't be empty"
+        })
+    }
+    
     try {
         // Ako ima generic u Model<UserAttributes> onda izbacuje grešku kada se ovde ne implementira dobro. 
         // U suprotnom ne reaguje
@@ -28,8 +35,17 @@ const register = async (req:Request, res:Response, next:NextFunction) => {
             password,
             role
         })
-        const userId = user.id
-        res.status(201).json(user)
+        userId = user.id
+        const profile = await Profile.create({
+            name: profileName,
+            status,
+            profilePhoto,
+            userId
+        })
+        res.status(201).json({
+            "user": user,
+            "profile": profile
+        })
 
     } catch(error) {
         return res.status(500).json({

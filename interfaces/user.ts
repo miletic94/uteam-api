@@ -8,12 +8,5 @@ export interface IUser {
     username?: string
     email?: string 
     password?: string
-    role?: Role 
-}
-
-export interface ICollectedUserData {
-    username:string
-    email:string
-    password:string, 
-    role: Role
+    role: Role 
 }

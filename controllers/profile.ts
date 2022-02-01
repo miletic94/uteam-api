@@ -7,24 +7,31 @@ import { getIdFromUuid } from "../utils/utils"
 
 const createProfile = async (req:Request, res:Response, next:NextFunction) => {
     const { status, name, profilePhoto, userUuid, companyUuid }:IProfile = req.body.profile 
+    let userId: number
+    let companyId: number | null = null
     if(name == null || userUuid == null) {
         return res.status(400).json({
             message: "Must insert 'name' and 'userUuid' "
         })
     }
     try {
-        const userId = await getIdFromUuid(
+        userId = await getIdFromUuid(
             userUuid,
             (userUuid) => {
                 return User.findOne({where: {userUuid}}) 
             }
         ) as number // Function is set up to throw error if null is return value, and allow Null is set to false
-        const companyId = await getIdFromUuid(
-            companyUuid, 
-            (companyUuid) => {
-            return Company.findOne({where: {companyUuid}})
-        }, 
-        true)
+        
+        // TESTIRATI !!!
+        if(companyUuid) {
+            companyId = await getIdFromUuid(
+                companyUuid, 
+                (companyUuid) => {
+                return Company.findOne({where: {companyUuid}})
+            }, 
+            true)
+        }
+        
         const profile = await Profile.create({
             status,
             name,
