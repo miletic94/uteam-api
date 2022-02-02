@@ -1,8 +1,9 @@
 export interface ICompany {
-    id: number
     name: string
-    logo?: string
-    userUuid?: string
+    logo: string
+    profileUuid?: string
+    slug: string
+    companyOwner?: number
 }
 
 export interface ICollectedCompanyData {

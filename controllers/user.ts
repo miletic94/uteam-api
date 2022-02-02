@@ -8,11 +8,14 @@ import Profile from "../models/profile"
 
 import {initializeLocalStrategy} from "../strategies/local"
 import { IProfile } from "../interfaces/profile"
+import { ICompany } from "../interfaces/company"
+import Company from "../models/company"
 
 
 const register = async (req:Request, res:Response, next:NextFunction) => {
     let {username, email, password, role}:IUser = req.body.user
     const { status, name:profileName, profilePhoto }:IProfile = req.body.profile 
+    let {name:companyName, logo, slug, companyOwner}:ICompany = req.body.company
     let userId:number
 
     if(username == null || email == null || password == null ) {
@@ -30,17 +33,28 @@ const register = async (req:Request, res:Response, next:NextFunction) => {
         // Ako ima generic u Model<UserAttributes> onda izbacuje grešku kada se ovde ne implementira dobro. 
         // U suprotnom ne reaguje
         const user = await User.create({
-            username: username,
-            email: email,
+            username,
+            email,
             password,
             role
         })
+
         userId = user.id
         const profile = await Profile.create({
             name: profileName,
             status,
             profilePhoto,
             userId
+        })
+        companyOwner = user.id
+        if(companyName == null) {
+            companyName = `${profile.name}'s Company`
+        }
+        const compoany = await Company.create({
+            name: companyName,
+            logo,
+            slug,
+            companyOwner
         })
         res.status(201).json({
             "user": user,
@@ -113,7 +127,10 @@ const login = async (req:Request, res:Response, next:NextFunction) => {
 const getAll = async (req:Request, res:Response, next:NextFunction) => {
     try {
         const users = await User.findAll({
-            include: [{model: Profile, as: "profile"}]
+            include: [
+                {model: Profile, as: "profile"}, 
+                {model:Company, as: "ownedCompanies"}
+            ]
         }
         )
         res.json(users)

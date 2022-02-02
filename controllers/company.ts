@@ -3,27 +3,33 @@ import slugify from "slugify"
 import { ICompany } from "../interfaces/company"
 import Company from "../models/company"
 import Profile from "../models/profile"
+import User from "../models/user"
 
 const createCompany = async (req:Request, res:Response, next:NextFunction) => {
-    let {name, logo }:ICompany = req.body
-    if(name == null) {
-        return res.status(400).json({
-            message: "Name can't be empty"
-        })
-    }
-    if(logo == null) {
-        logo = "https://cdn4.vectorstock.com/i/1000x1000/18/58/swoosh-generic-logo-vector-21061858.jpg"
-    }
-
-    const slug = slugify(name, {
-        lower: true
-    })
-
+    let {name, logo, slug, profileUuid, companyOwner}:ICompany = req.body.company
     try {
+        if(profileUuid == null) {
+            res.status(400).json({
+                message: "Must enter profileUuid"
+            })
+        }
+        const profile = await Profile.findOne({where: {profileUuid}})
+        if(profile == null) {
+            return res.status(400).json({
+                message: "Wrong profileUuid"
+            })
+        }
+        if(name == null) {
+            const profileName = profile.name
+            name = `${profileName}'s Company`
+        }
+        companyOwner = profile.userId
+
         const company = await Company.create({
             name,
             logo,
-            slug
+            slug,
+            companyOwner: companyOwner as number
         })
         res.json(company)
     } catch (error) {
@@ -38,7 +44,10 @@ const getAllCompanies = async (req:Request, res:Response, next:NextFunction) => 
     try {
         const {rows:companies} = await Company.findAndCountAll({
             limit:20,
-            include: {model:Profile, as:"profiles"}
+            include: [
+                {model:Profile, as:"profiles"},
+                {model:User, as:"owner"}
+            ]
         })
         res.json(companies)
     } catch (error) {
