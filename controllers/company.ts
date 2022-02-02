@@ -82,39 +82,35 @@ const getOneCompany = async (req:Request, res:Response, next:NextFunction) => {
 }
 
 const updateCompany = async (req:Request, res:Response, next:NextFunction) => {
-    const uuid = req.params.id
+    const companyUuid = req.params.id
     let {name, logo}:ICompany = req.body
-    if(name == null) {
-        return res.status(400).json({
-            message: "Name can't be empty"
+    if(companyUuid == null || companyUuid.trim() == "") {
+        return res.status(500).json({
+            message: "Must enter companyUuid"
         })
     }
-    const slug = slugify(name)
-    if(logo == null) {
-        logo = "https://cdn4.vectorstock.com/i/1000x1000/18/58/swoosh-generic-logo-vector-21061858.jpg"
-    }
-
     try {
-        const updatedStatus = await Company.update({ 
-            name, 
-            logo,
-            slug
-        }, 
-        {
-            where: {
-              companyUuid: uuid
-            }
-        });
-        if(updatedStatus[0] === 1) {
-            const profile =await Company.findOne({
-                where: {
-                    companyUuid: uuid
-                }
+        const company = await Company.findOne({
+            where:{companyUuid}
+        })
+        if(company == null) {
+            return res.status(500).json({
+                message: "Company with this companyUuid doesn't exist"
             })
-            return res.json(profile)
         }
-        return res.status(500).json({
-            message: "Something went wrong. Company probably doesn't exist"
+        if(name == null) {
+            return res.status(400).json({
+                message: "Name can't be empty"
+            })
+        }
+
+        if(logo == null) {
+            logo = "https://cdn4.vectorstock.com/i/1000x1000/18/58/swoosh-generic-logo-vector-21061858.jpg"
+        }
+
+        company.set({
+            name, 
+            logo
         })
 
     } catch (error) {

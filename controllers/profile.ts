@@ -91,66 +91,56 @@ const updateProfile = async (req:Request, res:Response, next:NextFunction) => {
     const profileUuid = req.params.id
     let {name, profilePhoto, status}:IProfile = req.body
 
-    const companyUuid:string | undefined = req.body.companyId
-    
-    const companyId = await getIdFromUuid(companyUuid, (companyUuid) => {
-        const company =Company.findOne({
-            where: {
-                companyUuid
-            }
-        })
-        return company
-    }, true)
-
-
-    if(name == null) {
-        return res.status(400).json({
-            message: "Name can't be empty"
-        })
-    }
-
-    if(profilePhoto == null) {
-        profilePhoto = "https://image.shutterstock.com/shutterstock/photos/1373616899/display_1500/stock-vector-hand-drawn-modern-man-avatar-profile-icon-or-portrait-icon-user-flat-avatar-icon-sign-1373616899.jpg"
-    }
-
-    if(status == null || (status!==Status.PENDING && status!==Status.PUBLISHED)) {
-        status = Status.PENDING
-    }
-
     try {
-        // const profile = await Profile.findOne({
-        //     where: {
-        //         profileUuid: uuid
-        //     }
-        // })
-        // if(profile == null) {
-        //     return res.json({
-        //         message: "Profile doesn't exist"
-        //     })
-        // }
-        const updatedStatus = await Profile.update({ 
-            name, 
-            profilePhoto, 
-            status,
-            companyId
-        }, 
-        {
+        if(profileUuid == null || profileUuid.trim() == "") {
+            return res.status(400).json({
+                message: "Must enter profileUuid"
+            })
+        }
+        console.log(profileUuid)
+    
+        const profile = await Profile.findOne({
             where: {
-              profileUuid
+                profileUuid
             }
-        });
-        if(updatedStatus[0] === 1) {
-            const profile =await Profile.findOne({
+        })
+        if (profile == null) {
+            return res.status(500).json({
+                message: "Profile with this profileUuid doesn't exist"
+            })
+        }
+        // To connect Profile to a Company (as employee)
+        const companyUuid:string | undefined = req.body.companyId
+        
+        const companyId = await getIdFromUuid(companyUuid, (companyUuid) => {
+            const company =Company.findOne({
                 where: {
-                    profileUuid
+                    companyUuid
                 }
             })
-            return res.json(profile)
+            return company
+        }, true)
+        //-----------------------------------------------// 
+        if(name == null) {
+            return res.status(400).json({
+                message: "Name can't be empty"
+            })
         }
-        return res.status(500).json({
-            message: "Something went wrong. Profile probably doesn't exist"
+    
+        if(profilePhoto == null) {
+            profilePhoto = "https://image.shutterstock.com/shutterstock/photos/1373616899/display_1500/stock-vector-hand-drawn-modern-man-avatar-profile-icon-or-portrait-icon-user-flat-avatar-icon-sign-1373616899.jpg"
+        }
+    
+        profile.set({
+            name,
+            profilePhoto,
+            status,
+            companyId
         })
 
+        res.json({
+            profile
+        })
     } catch (error) {
         res.status(500).json({
             message: error.message,
