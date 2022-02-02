@@ -97,12 +97,12 @@ const updateCompany = async (req:Request, res:Response, next:NextFunction) => {
             }
         });
         if(updatedStatus[0] === 1) {
-            const profile =await Company.findOne({
+            const company = await Company.findOne({
                 where: {
                     companyUuid: uuid
                 }
             })
-            return res.json(profile)
+            return res.json(company)
         }
         return res.status(500).json({
             message: "Something went wrong. Company probably doesn't exist"
