@@ -145,7 +145,7 @@ const deleteCompany = async (req:Request, res:Response, next:NextFunction) => {
     const userId = req.user
     passport.authenticate("jwt", async (error, user) => {
         if(error || !user) {
-            res.status(500).json({
+            return res.status(500).json({
                 message: "Something went wrong in deleting company"
             })
         }

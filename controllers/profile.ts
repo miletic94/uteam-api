@@ -56,9 +56,16 @@ const getAllProfiles = async (req:Request, res:Response, next:NextFunction) => {
 
     try {
         const {count, rows:profiles} = await Profile.findAndCountAll({
-            include: [{model: User, as: "user"}, {model:Company, as: "company"}],
+            include:[
+                {
+                    model:User, as: "user",
+                    include: [{model:Company, as: "ownedCompanies"}]
+                }, 
+                {model:Company, as: "company"}
+            ],
             limit: 20
         })
+        console.log(profiles);
         res.json(profiles)
     } catch (error) {
         res.status(500).json({
@@ -75,7 +82,13 @@ const getOneProfile = async (req:Request, res:Response, next:NextFunction) => {
             where: {
                 profileUuid: uuid,
             },
-            include:[{model:User, as: "user"}, {model:Company, as: "company"}]
+            include:[
+                {
+                    model:User, as: "user",
+                    include: [{model:Company, as: "ownedCompanies"}]
+                }, 
+                {model:Company, as: "company"}
+            ]
         })
         if(profile == null) {
             return res.status(406).json({
@@ -170,7 +183,7 @@ const deleteProfile = async (req:Request, res:Response, next:NextFunction) => {
     const profileUuid = req.params.id 
     passport.authenticate("jwt", async (error, user) => {
         if(error || !user) {
-            res.status(500).json({
+            return res.status(500).json({
                 message: "Something went wrong in deleting profile"
             })
         }
