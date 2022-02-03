@@ -7,46 +7,49 @@ import User from "../models/user"
 import { getIdFromUuid } from "../utils/utils"
 
 const createProfile = async (req:Request, res:Response, next:NextFunction) => {
-    const { status, name, profilePhoto, userUuid, companyUuid }:IProfile = req.body 
-    let userId: number | null
+    const { status, name, profilePhoto, companyUuid }:IProfile = req.body 
+    let userId: number
     let companyId: number | null = null
-    if(name == null || userUuid == null) {
+    if(name == null) {
         return res.status(400).json({
-            message: "Must insert 'name' and 'userUuid' "
+            message: "Must enter name"
         })
     }
-    try {
-        userId = await getIdFromUuid(
-            userUuid,
-            (userUuid) => {
-                return User.findOne({where: {userUuid}}) 
-            }
-        ) as number // Function is set up to throw error if null is return value, and allow Null is set to false
-        
-        // TESTIRATI !!!
-        if(companyUuid) {
-            companyId = await getIdFromUuid(
-                companyUuid, 
-                (companyUuid) => {
-                return Company.findOne({where: {companyUuid}})
-            }, 
-            true)
+    passport.authenticate("jwt", async (error, user) => {
+        if(error || !user) {
+            res.status(500).json({
+                message: "Something went wrong in updating profile"
+            })
         }
-        
-        const profile = await Profile.create({
-            status,
-            name,
-            profilePhoto,
-            userId,
-            companyId
-        })
-        res.status(201).json(profile)
-    } catch (error) {
-        res.status(500).json({
-            message: error.message,
-            error
-        })
-    }
+        userId = user.id
+
+        try {
+            // TESTIRATI !!!
+            if(companyUuid) {
+                companyId = await getIdFromUuid(
+                    companyUuid, 
+                    (companyUuid) => {
+                    return Company.findOne({where: {companyUuid}})
+                }, 
+                true)
+            }
+            
+            const profile = await Profile.create({
+                status,
+                name,
+                profilePhoto,
+                userId,
+                companyId
+            })
+            return res.status(201).json(profile)
+        } catch (error) {
+            res.status(500).json({
+                message: error.message,
+                error
+            })
+        }
+    })(req, res, next)
+    
 }
 
 const getAllProfiles = async (req:Request, res:Response, next:NextFunction) => {

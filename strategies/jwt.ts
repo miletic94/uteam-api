@@ -31,5 +31,11 @@ export default function initialize(secret:string, passport:PassportStatic) {
     }
     passport.use(new JwtStrategy(options, authorizeUser))
 
+    // passport.serializeUser((user, done) => {
+    //     done(null, user)
+    // })
+    // passport.deserializeUser((user:number, done) => {
+    //     done(null, user)
+    // })
 }
 

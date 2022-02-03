@@ -6,38 +6,40 @@ import Profile from "../models/profile"
 import User from "../models/user"
 
 const createCompany = async (req:Request, res:Response, next:NextFunction) => {
-    let {name, logo, slug, profileUuid, companyOwner}:ICompany = req.body
-    try {
-        if(profileUuid == null) {
-            res.status(400).json({
-                message: "Must enter profileUuid"
-            })
-        }
-        const profile = await Profile.findOne({where: {profileUuid}})
-        if(profile == null) {
-            return res.status(400).json({
-                message: "Wrong profileUuid"
-            })
-        }
-        if(name == null) {
-            const profileName = profile.name
-            name = `${profileName}'s Company`
-        }
-        companyOwner = profile.userId
+    let {name, logo, slug, profileUuid}:ICompany = req.body
 
-        const company = await Company.create({
-            name,
-            logo,
-            slug,
-            companyOwner: companyOwner as number
-        })
-        res.json(company)
-    } catch (error) {
-        res.status(500).json({
-            message: error.message,
-            error
-        })
-    }
+    passport.authenticate("jwt", async (error, user) => {
+        if(error || !user) {
+            res.status(500).json({
+                message: "Something went wrong in updating profile"
+            })
+        }
+        const companyOwner = user.id
+        try {
+            if(name == null) {
+                const profile = await Profile.findOne({where:{userId: companyOwner}})
+                if(profile == null) {
+                    return res.status(400).json({
+                        message: "Name can't be empty"
+                    })
+                }
+                name = `${profile.name}'s Company`
+            }
+
+            const company = await Company.create({
+                name,
+                logo,
+                slug,
+                companyOwner
+            })
+            res.json(company)
+        } catch (error) {
+            res.status(500).json({
+                message: error.message,
+                error
+            })
+        }
+    })(req, res, next)
 }
 
 const getAllCompanies = async (req:Request, res:Response, next:NextFunction) => {
