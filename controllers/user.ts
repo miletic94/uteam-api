@@ -50,7 +50,7 @@ const register = async (req:Request, res:Response, next:NextFunction) => {
         if(companyName == null) {
             companyName = `${profile.name}'s Company`
         }
-        const compoany = await Company.create({
+        const company = await Company.create({
             name: companyName,
             logo,
             slug,
@@ -58,7 +58,8 @@ const register = async (req:Request, res:Response, next:NextFunction) => {
         })
         res.status(201).json({
             "user": user,
-            "profile": profile
+            "profile": profile,
+            "company": company
         })
 
     } catch(error) {

@@ -1,12 +1,12 @@
 import {Request, Response, NextFunction } from "express"
-import slugify from "slugify"
+import passport from "passport"
 import { ICompany } from "../interfaces/company"
 import Company from "../models/company"
 import Profile from "../models/profile"
 import User from "../models/user"
 
 const createCompany = async (req:Request, res:Response, next:NextFunction) => {
-    let {name, logo, slug, profileUuid, companyOwner}:ICompany = req.body.company
+    let {name, logo, slug, profileUuid, companyOwner}:ICompany = req.body
     try {
         if(profileUuid == null) {
             res.status(400).json({
@@ -83,61 +83,97 @@ const getOneCompany = async (req:Request, res:Response, next:NextFunction) => {
 
 const updateCompany = async (req:Request, res:Response, next:NextFunction) => {
     const companyUuid = req.params.id
-    let {name, logo}:ICompany = req.body
+    let {name, logo}:ICompany = req.body    
+
     if(companyUuid == null || companyUuid.trim() == "") {
         return res.status(500).json({
             message: "Must enter companyUuid"
         })
     }
-    try {
-        const company = await Company.findOne({
-            where:{companyUuid}
-        })
-        if(company == null) {
-            return res.status(500).json({
-                message: "Company with this companyUuid doesn't exist"
+    passport.authenticate("jwt", async (error, user) => {
+        if(error || !user) {
+            res.status(500).json({
+                message: "Something went wrong in updating company"
             })
         }
-        if(name == null) {
-            return res.status(400).json({
-                message: "Name can't be empty"
+        try {
+            const company = await Company.findOne({
+                where:{companyUuid}
+            })
+            if(company == null) {
+                return res.status(500).json({
+                    message: "Company with this companyUuid doesn't exist"
+                })
+            }
+            if(user.id !== company.companyOwner) {
+                return res.status(401).json({
+                    message: "Not Authorized"
+                })
+            }
+            
+            if(name == null) {
+                return res.status(400).json({
+                    message: "Name can't be empty"
+                })
+            }
+    
+            if(logo == null) {
+                logo = "https://cdn4.vectorstock.com/i/1000x1000/18/58/swoosh-generic-logo-vector-21061858.jpg"
+            }
+    
+            company.set({
+                name, 
+                logo
+            })
+            company.save()
+            res.json(company)
+    
+        } catch (error) {
+            res.status(500).json({
+                message: error.message,
+                error
             })
         }
-
-        if(logo == null) {
-            logo = "https://cdn4.vectorstock.com/i/1000x1000/18/58/swoosh-generic-logo-vector-21061858.jpg"
-        }
-
-        company.set({
-            name, 
-            logo
-        })
-
-    } catch (error) {
-        res.status(500).json({
-            message: error.message,
-            error
-        })
-    }
+    })(req, res, next)
+    
 }
 
 const deleteCompany = async (req:Request, res:Response, next:NextFunction) => {
     const uuid = req.params.id 
-    try {
-        await Company.destroy({
-            where: {
-                companyUuid: uuid
+    const userId = req.user
+    passport.authenticate("jwt", async (error, user) => {
+        if(error || !user) {
+            res.status(500).json({
+                message: "Something went wrong in deleting company"
+            })
+        }
+        try {
+            const company = await Company.findOne({where: {companyUuid: uuid}})
+            if(company == null) {
+                return res.json({
+                    message: "Company doesn't exist"
+                })
             }
-        })
-        return res.json({
-            message: "Company deleted if existed"
-        })
-    } catch (error) {
-        res.status(500).json({
-            message: error.message,
-            error
-        })
-    }
+            if(user.id !== company.companyOwner) {
+                return res.status(401).json({
+                    message: "Not Authorized"
+                })
+            }
+
+            company.destroy()
+
+            return res.json({
+                message: "Company deleted"
+            })
+        } catch (error) {
+            res.status(500).json({
+                message: error.message,
+                error
+            })
+        }
+        
+    })(req, res, next)
+    
 }
 
 export {

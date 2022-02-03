@@ -8,6 +8,7 @@ import bcrypt from "bcrypt"
 
 interface UserAttributes {
   userUuid: string
+  id?: number
   username: string
   email: string
   password: string
@@ -23,7 +24,7 @@ interface UserCreationAttributes extends Optional<UserAttributes, "userUuid"> {}
   class User extends Model<UserAttributes, UserCreationAttributes>
     implements UserAttributes {
     userUuid!: string;
-    id!: number
+    id!: number;
     username!:string
     email!:string
     password!: string

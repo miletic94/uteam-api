@@ -11,7 +11,7 @@ const signJWT = (user:IUser, callback: (error: Error | null, token: string | nul
         config.server.token.secret,
         {
             algorithm: "HS256",
-            expiresIn: 60
+            expiresIn: "1h"
         }, 
         (error, token) => {
             if(error) {
