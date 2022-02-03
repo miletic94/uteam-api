@@ -3,15 +3,15 @@ import config from "../config/config"
 import { IUser } from "../interfaces/user"
 
 const signJWT = (user:IUser, callback: (error: Error | null, token: string | null) => void):void => {
-
+    
     try {
         jwt.sign( {
-            user: user.username
+            sub: user.username
         }, 
-        config.server.token.secret as string,
+        config.server.token.secret,
         {
             algorithm: "HS256",
-            expiresIn: 60
+            expiresIn: "1h"
         }, 
         (error, token) => {
             if(error) {

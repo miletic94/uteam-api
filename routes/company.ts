@@ -4,7 +4,16 @@ import {
     getOneCompany,
     updateCompany, deleteCompany
 } from "../controllers/company"
-getOneCompany
+
+import config from "../config/config"
+import passport from "passport"
+import initializeJwt from "../strategies/jwt"
+
+initializeJwt(
+    config.server.token.secret,
+    passport
+)
+
 const router = express.Router()
 
 router.get("/companies", getAllCompanies)
