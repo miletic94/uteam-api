@@ -106,6 +106,7 @@ const updateCompany = async (req:Request, res:Response, next:NextFunction) => {
                 message: "Something went wrong while updating company"
             })
         }
+        console.log(req.user)
         try {
             const company = await Company.findOne({
                 where:{companyUuid}

@@ -176,9 +176,7 @@ const updateProfile = async (req:Request, res:Response, next:NextFunction) => {
     
             profile.save()
     
-            res.json({
-                profile
-            })
+            res.json(profile)
         } catch (error) {
             res.status(500).json({
                 message: error.message,
