@@ -5,6 +5,7 @@ import Company from "../models/company"
 import Profile from "../models/profile"
 import User from "../models/user"
 import { getIdFromUuid } from "../utils/utils"
+import isUuid from "is-uuid"
 
 const createProfile = async (req:Request, res:Response, next:NextFunction) => {
     const { status, name, profilePhoto, companyUuid }:IProfile = req.body 
@@ -25,7 +26,7 @@ const createProfile = async (req:Request, res:Response, next:NextFunction) => {
 
         try {
             // TESTIRATI !!!
-            if(companyUuid) {
+            if(companyUuid && isUuid.v4(companyUuid)) {
                 companyId = await getIdFromUuid(
                     companyUuid, 
                     (companyUuid) => {
@@ -65,7 +66,6 @@ const getAllProfiles = async (req:Request, res:Response, next:NextFunction) => {
             ],
             limit: 20
         })
-        console.log(profiles);
         res.json(profiles)
     } catch (error) {
         res.status(500).json({
@@ -76,11 +76,16 @@ const getAllProfiles = async (req:Request, res:Response, next:NextFunction) => {
 }
 
 const getOneProfile = async (req:Request, res:Response, next:NextFunction) => {
-    const uuid = req.params.id 
+    const profileUuid = req.params.id 
+    if(!isUuid.v4(profileUuid)) {
+        return res.status(400).json({
+            message: "You must enter valid profileUuid"
+        })
+    }
     try {
         const profile = await Profile.findOne({
             where: {
-                profileUuid: uuid,
+                profileUuid,
             },
             include:[
                 {
@@ -91,7 +96,7 @@ const getOneProfile = async (req:Request, res:Response, next:NextFunction) => {
             ]
         })
         if(profile == null) {
-            return res.status(406).json({
+            return res.status(404).json({
                 message: "Can't find profile."
             })
         }
@@ -107,6 +112,11 @@ const getOneProfile = async (req:Request, res:Response, next:NextFunction) => {
 const updateProfile = async (req:Request, res:Response, next:NextFunction) => {
     const profileUuid = req.params.id
     let {name, profilePhoto, status}:IProfile = req.body
+    if(!isUuid.v4(profileUuid)) {
+        return res.status(400).json({
+            message: "You must enter valid profileUuid"
+        })
+    }
     passport.authenticate("jwt", async (error, user) => {
         if(error || !user) {
             return res.status(500).json({
@@ -131,7 +141,7 @@ const updateProfile = async (req:Request, res:Response, next:NextFunction) => {
                 })
             }
             if(user.id !== profile.userId) {
-                return res.status(401).json({
+                return res.status(403).json({
                     message: "Not Authorized"
                 })
             }
@@ -139,7 +149,7 @@ const updateProfile = async (req:Request, res:Response, next:NextFunction) => {
             const companyUuid:string | undefined = req.body.companyId
             
             const companyId = await getIdFromUuid(companyUuid, (companyUuid) => {
-                const company =Company.findOne({
+                const company = Company.findOne({
                     where: {
                         companyUuid
                     }
@@ -181,6 +191,11 @@ const updateProfile = async (req:Request, res:Response, next:NextFunction) => {
 
 const deleteProfile = async (req:Request, res:Response, next:NextFunction) => {
     const profileUuid = req.params.id 
+    if(!isUuid.v4(profileUuid)) {
+        return res.status(400).json({
+            message: "You must enter valid profileUuid"
+        })
+    }
     passport.authenticate("jwt", async (error, user) => {
         if(error || !user) {
             return res.status(500).json({
@@ -194,12 +209,12 @@ const deleteProfile = async (req:Request, res:Response, next:NextFunction) => {
                 }
             })
             if(profile == null) {
-                return res.status(400).json({
+                return res.status(404).json({
                     message: "Profile with this profileUuid doesn't exist"
                 })
             }
             if(user.id !== profile.userId) {
-                return res.status(401).json({
+                return res.status(403).json({
                     message: "Not Authorized"
                 })
             }
@@ -215,8 +230,6 @@ const deleteProfile = async (req:Request, res:Response, next:NextFunction) => {
                 error
             })
         }
-        
-
     })(req, res, next)
     
 }

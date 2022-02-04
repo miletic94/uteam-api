@@ -4,6 +4,7 @@ import { ICompany } from "../interfaces/company"
 import Company from "../models/company"
 import Profile from "../models/profile"
 import User from "../models/user"
+import isUuid from "is-uuid"
 
 const createCompany = async (req:Request, res:Response, next:NextFunction) => {
     let {name, logo, slug, profileUuid}:ICompany = req.body
@@ -18,7 +19,7 @@ const createCompany = async (req:Request, res:Response, next:NextFunction) => {
         try {
             const profile = await Profile.findOne({where:{userId: companyOwner}})
                 if(profile == null) {
-                    return res.status(400).json({
+                    return res.status(403).json({
                         message: "You must have profile to create a company"
                     })
                 }
@@ -61,16 +62,21 @@ const getAllCompanies = async (req:Request, res:Response, next:NextFunction) => 
 }
 
 const getOneCompany = async (req:Request, res:Response, next:NextFunction) => {
-    const uuid = req.params.id 
+    const companyUuid = req.params.id 
+    if(!isUuid.v4(companyUuid)) {
+        return res.status(400).json({
+            message: "You must enter valid companyUuid"
+        })
+    }
     try {
         const company = await Company.findOne({
             where: {
-                companyUuid: uuid
+                companyUuid
             },
             include: {model:Profile, as:"profiles"}
         })
         if(company == null) {
-            return res.status(406).json({
+            return res.status(404).json({
                 message: "Can't find company.",
             })
         }
@@ -89,9 +95,9 @@ const updateCompany = async (req:Request, res:Response, next:NextFunction) => {
     const companyUuid = req.params.id
     let {name, logo}:ICompany = req.body    
 
-    if(companyUuid == null || companyUuid.trim() == "") {
-        return res.status(500).json({
-            message: "Must enter companyUuid"
+    if(!isUuid.v4(companyUuid)) {
+        return res.status(400).json({
+            message: "You must enter valid companyUuid"
         })
     }
     passport.authenticate("jwt", async (error, user) => {
@@ -105,12 +111,12 @@ const updateCompany = async (req:Request, res:Response, next:NextFunction) => {
                 where:{companyUuid}
             })
             if(company == null) {
-                return res.status(500).json({
+                return res.status(404).json({
                     message: "Company with this companyUuid doesn't exist"
                 })
             }
             if(user.id !== company.companyOwner) {
-                return res.status(401).json({
+                return res.status(403).json({
                     message: "Not Authorized"
                 })
             }
@@ -143,8 +149,13 @@ const updateCompany = async (req:Request, res:Response, next:NextFunction) => {
 }
 
 const deleteCompany = async (req:Request, res:Response, next:NextFunction) => {
-    const uuid = req.params.id 
+    const companyUuid = req.params.id 
     const userId = req.user
+    if(!isUuid.v4(companyUuid)) {
+        return res.status(400).json({
+            message: "You must enter valid companyUuid"
+        })
+    }
     passport.authenticate("jwt", async (error, user) => {
         if(error || !user) {
             return res.status(500).json({
@@ -152,14 +163,14 @@ const deleteCompany = async (req:Request, res:Response, next:NextFunction) => {
             })
         }
         try {
-            const company = await Company.findOne({where: {companyUuid: uuid}})
+            const company = await Company.findOne({where: {companyUuid}})
             if(company == null) {
-                return res.json({
-                    message: "Company doesn't exist"
+                return res.status(404).json({
+                    message: "Company with this companyUuid doesn't exist"
                 })
             }
             if(user.id !== company.companyOwner) {
-                return res.status(401).json({
+                return res.status(403).json({
                     message: "Not Authorized"
                 })
             }
