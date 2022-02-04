@@ -82,6 +82,12 @@ interface UserCreationAttributes extends Optional<UserAttributes, "userUuid"> {}
     modelName: 'User',
     tableName: "users",
     hooks: {
+      beforeValidate(values) {
+        let email = values.getDataValue("email")
+        email = email.trim()
+        email = email.toLowerCase()
+        values.setDataValue("email", email)
+      },
       async beforeSave(user) {
         const hashedPassword = await bcrypt.hash(user.password, 10)
         user.password = hashedPassword
