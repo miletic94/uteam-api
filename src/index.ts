@@ -9,6 +9,7 @@ import healthCheckRoute from "../routes/healthCheck";
 import userRoutes from "../routes/user"
 import profileRoutes from "../routes/profile"
 import companyRoutes from "../routes/company"
+import errorHandler from "../middleware/errorHandler";
 
 const app:Application = express()
 app.use(express.json())
@@ -18,7 +19,7 @@ initializeJwt(
     passport
 )
 app.use("/", [healthCheckRoute, userRoutes, profileRoutes, companyRoutes])
-
+app.use(errorHandler)
 
 
 

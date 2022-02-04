@@ -10,6 +10,7 @@ import {initializeLocalStrategy} from "../strategies/local"
 import { IProfile } from "../interfaces/profile"
 import { ICompany } from "../interfaces/company"
 import Company from "../models/company"
+import { HttpException } from "../middleware/errorHandler"
 
 
 const register = async (req:Request, res:Response, next:NextFunction) => {
@@ -19,14 +20,11 @@ const register = async (req:Request, res:Response, next:NextFunction) => {
     let userId:number
 
     if(username == null || email == null || password == null ) {
-        return res.status(400).json({
-            message: "Must enter username, email, and password"
-        })
+        return next( new HttpException(400, "Must enter username, email, and password"))
     }
     if(profileName == null) {
-        return res.status(400).json({
-            message: "Profile name can't be empty"
-        })
+        return next( new HttpException(400,  "Profile name can't be empty"))
+
     }
     
     try {
@@ -74,9 +72,7 @@ const register = async (req:Request, res:Response, next:NextFunction) => {
 const login = async (req:Request, res:Response, next:NextFunction) => {
     const {username, email}:IUser = req.body
     if(username == null && email == null) {
-        return res.status(400).json({
-            message: "You must enter email or password"
-        })
+        return next(new HttpException(400, "You must enter username or email"))
     }
     if(username) {
         initializeLocalStrategy("username", passport, (username) => {
@@ -99,15 +95,13 @@ const login = async (req:Request, res:Response, next:NextFunction) => {
     }
     passport.authenticate("local", (error, user:IUser, info) => {
         if(error) {
-            return res.status(500).json(error)
+        return next( new HttpException(500,  error.message))
+    
         }
         if(user) {
             signJWT(user, (error, token) => {
                 if(error) {
-                    return res.status(500).json({
-                        message: error.message,
-                        error
-                    })
+                    return next( new HttpException(500,  error.message))
                 }
                 if(token) {
                     res.json({
@@ -137,14 +131,16 @@ const getAll = async (req:Request, res:Response, next:NextFunction) => {
         res.json(users)
     } catch (error) {
         res.status(500).json({
-            message: error.message
+            message: error.message,
+            error
         })
     }
     
 }
+
+// Not from assigment
 const deleteOne = async (req:Request, res:Response, next:NextFunction) => {
     const userUuid = req.params.id
-    console.log(userUuid);
     await User.destroy({
         where: {userUuid},
         truncate: false

@@ -1,26 +1,24 @@
 import {Request, Response, NextFunction } from "express"
 import passport from "passport"
-import { IProfile, Status } from "../interfaces/profile"
+import { IProfile } from "../interfaces/profile"
 import Company from "../models/company"
 import Profile from "../models/profile"
 import User from "../models/user"
 import { getIdFromUuid } from "../utils/utils"
 import isUuid from "is-uuid"
+import { HttpException } from "../middleware/errorHandler"
 
 const createProfile = async (req:Request, res:Response, next:NextFunction) => {
     const { status, name, profilePhoto, companyUuid }:IProfile = req.body 
     let userId: number
     let companyId: number | null = null
     if(name == null) {
-        return res.status(400).json({
-            message: "Must enter name"
-        })
+        return next( new HttpException(400,  "Must enter name"))
+
     }
     passport.authenticate("jwt", async (error, user) => {
         if(error || !user) {
-            return res.status(500).json({
-                message: "Something went wrong while creating profile"
-            })
+            return next( new HttpException(500, "Something went wrong while creating profile"))
         }
         userId = user.id
 
@@ -78,9 +76,7 @@ const getAllProfiles = async (req:Request, res:Response, next:NextFunction) => {
 const getOneProfile = async (req:Request, res:Response, next:NextFunction) => {
     const profileUuid = req.params.id 
     if(!isUuid.v4(profileUuid)) {
-        return res.status(400).json({
-            message: "You must enter valid profileUuid"
-        })
+        return next(new HttpException(400, "You must enter valid profileUuid"))
     }
     try {
         const profile = await Profile.findOne({
@@ -96,9 +92,7 @@ const getOneProfile = async (req:Request, res:Response, next:NextFunction) => {
             ]
         })
         if(profile == null) {
-            return res.status(404).json({
-                message: "Can't find profile."
-            })
+            return next( new HttpException(400, "Can't find profile."))
         }
         res.json(profile)
     } catch (error) {
@@ -113,21 +107,15 @@ const updateProfile = async (req:Request, res:Response, next:NextFunction) => {
     const profileUuid = req.params.id
     let {name, profilePhoto, status}:IProfile = req.body
     if(!isUuid.v4(profileUuid)) {
-        return res.status(400).json({
-            message: "You must enter valid profileUuid"
-        })
+        return next( new HttpException(400, "You must enter valid profileUuid"))
     }
     passport.authenticate("jwt", async (error, user) => {
         if(error || !user) {
-            return res.status(500).json({
-                message: "Something went wrong while updating profile"
-            })
+            return next( new HttpException(500, "Something went wrong while updating profile"))
         }
         try {
             if(profileUuid == null || profileUuid.trim() == "") {
-                return res.status(400).json({
-                    message: "Must enter profileUuid"
-                })
+                return next( new HttpException(400, "Must enter profileUuid"))
             }
         
             const profile = await Profile.findOne({
@@ -136,14 +124,10 @@ const updateProfile = async (req:Request, res:Response, next:NextFunction) => {
                 }
             })
             if (profile == null) {
-                return res.status(500).json({
-                    message: "Profile with this profileUuid doesn't exist"
-                })
+                return next( new HttpException(404, "Profile with this profileUuid doesn't exist"))
             }
             if(user.id !== profile.userId) {
-                return res.status(403).json({
-                    message: "Not Authorized"
-                })
+                return next( new HttpException(403, "Not Authorized"))
             }
             // To connect Profile to a Company (as employee)
             const companyUuid:string | undefined = req.body.companyId
@@ -158,9 +142,7 @@ const updateProfile = async (req:Request, res:Response, next:NextFunction) => {
             }, true)
             //-----------------------------------------------// 
             if(name == null) {
-                return res.status(400).json({
-                    message: "Name can't be empty"
-                })
+                return next( new HttpException(400, "Name can't be empty"))
             }
         
             if(profilePhoto == null) {
@@ -190,15 +172,11 @@ const updateProfile = async (req:Request, res:Response, next:NextFunction) => {
 const deleteProfile = async (req:Request, res:Response, next:NextFunction) => {
     const profileUuid = req.params.id 
     if(!isUuid.v4(profileUuid)) {
-        return res.status(400).json({
-            message: "You must enter valid profileUuid"
-        })
+        return next( new HttpException(400, "You must enter valid profileUuid"))
     }
     passport.authenticate("jwt", async (error, user) => {
         if(error || !user) {
-            return res.status(500).json({
-                message: "Something went wrong while deleting profile"
-            })
+            return next( new HttpException(500, "Something went wrong while deleting profile"))
         }
         try {
             const profile = await Profile.findOne({
@@ -207,14 +185,10 @@ const deleteProfile = async (req:Request, res:Response, next:NextFunction) => {
                 }
             })
             if(profile == null) {
-                return res.status(404).json({
-                    message: "Profile with this profileUuid doesn't exist"
-                })
+                return next( new HttpException(404, "Profile with this profileUuid doesn't exist"))
             }
             if(user.id !== profile.userId) {
-                return res.status(403).json({
-                    message: "Not Authorized"
-                })
+                return next( new HttpException(403, "Not Authorized"))
             }
 
             profile.destroy()
