@@ -17,8 +17,8 @@ const createProfile = async (req:Request, res:Response, next:NextFunction) => {
     }
     passport.authenticate("jwt", async (error, user) => {
         if(error || !user) {
-            res.status(500).json({
-                message: "Something went wrong in updating profile"
+            return res.status(500).json({
+                message: "Something went wrong while creating profile"
             })
         }
         userId = user.id
@@ -109,8 +109,8 @@ const updateProfile = async (req:Request, res:Response, next:NextFunction) => {
     let {name, profilePhoto, status}:IProfile = req.body
     passport.authenticate("jwt", async (error, user) => {
         if(error || !user) {
-            res.status(500).json({
-                message: "Something went wrong in updating profile"
+            return res.status(500).json({
+                message: "Something went wrong while updating profile"
             })
         }
         try {
@@ -184,7 +184,7 @@ const deleteProfile = async (req:Request, res:Response, next:NextFunction) => {
     passport.authenticate("jwt", async (error, user) => {
         if(error || !user) {
             return res.status(500).json({
-                message: "Something went wrong in deleting profile"
+                message: "Something went wrong while deleting profile"
             })
         }
         try {

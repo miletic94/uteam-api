@@ -34,7 +34,7 @@ interface CompanyCreationAttributes extends Optional<CompanyAttributes, "company
           this.get(), 
           id: undefined
         }
-    }
+    } 
   };
   Company.init({
     companyUuid: {

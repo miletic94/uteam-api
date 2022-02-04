@@ -10,19 +10,19 @@ const createCompany = async (req:Request, res:Response, next:NextFunction) => {
 
     passport.authenticate("jwt", async (error, user) => {
         if(error || !user) {
-            res.status(500).json({
-                message: "Something went wrong in updating profile"
+            return res.status(500).json({
+                message: "Something went wrong while creating company"
             })
         }
         const companyOwner = user.id
         try {
-            if(name == null) {
-                const profile = await Profile.findOne({where:{userId: companyOwner}})
+            const profile = await Profile.findOne({where:{userId: companyOwner}})
                 if(profile == null) {
                     return res.status(400).json({
-                        message: "Name can't be empty"
+                        message: "You must have profile to create a company"
                     })
                 }
+            if(name == null) {
                 name = `${profile.name}'s Company`
             }
 
@@ -83,6 +83,8 @@ const getOneCompany = async (req:Request, res:Response, next:NextFunction) => {
     }
 }
 
+
+
 const updateCompany = async (req:Request, res:Response, next:NextFunction) => {
     const companyUuid = req.params.id
     let {name, logo}:ICompany = req.body    
@@ -94,8 +96,8 @@ const updateCompany = async (req:Request, res:Response, next:NextFunction) => {
     }
     passport.authenticate("jwt", async (error, user) => {
         if(error || !user) {
-            res.status(500).json({
-                message: "Something went wrong in updating company"
+            return res.status(500).json({
+                message: "Something went wrong while updating company"
             })
         }
         try {
@@ -146,7 +148,7 @@ const deleteCompany = async (req:Request, res:Response, next:NextFunction) => {
     passport.authenticate("jwt", async (error, user) => {
         if(error || !user) {
             return res.status(500).json({
-                message: "Something went wrong in deleting company"
+                message: "Something went wrong while deleting company"
             })
         }
         try {
