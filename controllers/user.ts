@@ -75,23 +75,10 @@ const login = async (req:Request, res:Response, next:NextFunction) => {
         return next(new HttpException(400, "You must enter username or email"))
     }
     if(username) {
-        initializeLocalStrategy("username", passport, (username) => {
-            const _user = User.findOne({
-                where: {
-                    username
-                }
-            })
-            return _user
-        })
+        initializeLocalStrategy("username", username, passport)
+
     } else if (email) {
-        initializeLocalStrategy("email", passport, (email) => {
-            const _user = User.findOne({
-                where: {
-                    email
-                }
-            })
-            return _user
-        })
+        initializeLocalStrategy("email", email, passport)
     }
     passport.authenticate("local", (error, user:IUser, info) => {
         if(error) {

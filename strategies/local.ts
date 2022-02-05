@@ -1,17 +1,21 @@
 import { PassportStatic } from "passport";
 import { Strategy as LocalStrategy, VerifyFunction } from "passport-local"
-import { IUser } from "../interfaces/user";
 import bcrypt from "bcrypt"
 import User from "../models/user";
 
-export  function initializeLocalStrategy(tactics:"username", passport: PassportStatic, callback:(username:string) => Promise<User | null>):void
-export function initializeLocalStrategy(tactics:"email" ,passport: PassportStatic, callback:(email:string) => Promise<User | null>):void
+export  function initializeLocalStrategy(tactics:"username", credential:string, passport: PassportStatic):void
+export function initializeLocalStrategy(tactics:"email", credential:string, passport: PassportStatic):void
 
-export function initializeLocalStrategy(tactics:"username" | "email", passport:PassportStatic, callback:(credential:string) => Promise<User | null>) {
+export function initializeLocalStrategy(tactics:"username" | "email", credential:string, passport:PassportStatic) {
     const authenticateUser:VerifyFunction = async ( credential, password, done) => {
 
         try {
-            const user = await callback(credential)
+            let user
+            if(tactics === "username") {
+                user = await User.findOne({where:{username: credential}})
+            } else if (tactics === "email") {
+                user = await User.findOne({where: {email: credential}})
+            }
 
             if(user == null) {
                 return done(null, false, {

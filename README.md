@@ -24,6 +24,8 @@ Start production .js server
 ```
 $ npm start
 ```
+## Authorization
+For authorizing user in protected routes (logging in) use Authorization: "Barer \<TOKEN\>" in header of requests
 # Usage
 ### Registering
 
