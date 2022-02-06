@@ -10,7 +10,7 @@ import {initializeLocalStrategy} from "../strategies/local"
 import { IProfile } from "../interfaces/profile"
 import { ICompany } from "../interfaces/company"
 import Company from "../models/company"
-import { HttpException } from "../middleware/errorHandler"
+import { ErrorHandler } from "../middleware/errorHandler/ErrorHandler"
 
 
 const register = async (req:Request, res:Response, next:NextFunction) => {
@@ -20,10 +20,10 @@ const register = async (req:Request, res:Response, next:NextFunction) => {
     let userId:number
 
     if(username == null || email == null || password == null ) {
-        return next( new HttpException(400, "Must enter username, email, and password"))
+        return next( ErrorHandler.badRequest("Must enter username, email, and password"))
     }
     if(profileName == null) {
-        return next( new HttpException(400,  "Profile name can't be empty"))
+        return next( ErrorHandler.badRequest( "Profile name can't be empty"))
 
     }
     
@@ -72,7 +72,7 @@ const register = async (req:Request, res:Response, next:NextFunction) => {
 const login = async (req:Request, res:Response, next:NextFunction) => {
     const {username, email}:IUser = req.body
     if(username == null && email == null) {
-        return next(new HttpException(400, "You must enter username or email"))
+        return next(ErrorHandler.badRequest("You must enter username or email"))
     }
     if(username) {
         initializeLocalStrategy("username", username, passport)
@@ -82,13 +82,13 @@ const login = async (req:Request, res:Response, next:NextFunction) => {
     }
     passport.authenticate("local", (error, user:IUser, info) => {
         if(error) {
-        return next( new HttpException(500,  error.message))
+        return next( ErrorHandler.internalServerError(error.message))
     
         }
         if(user) {
             signJWT(user, (error, token) => {
                 if(error) {
-                    return next( new HttpException(500,  error.message))
+                    return next( ErrorHandler.internalServerError(error.message))
                 }
                 if(token) {
                     res.json({

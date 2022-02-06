@@ -5,20 +5,20 @@ import Company from "../models/company"
 import Profile from "../models/profile"
 import User from "../models/user"
 import isUuid from "is-uuid"
-import { HttpException } from "../middleware/errorHandler"
+import { ErrorHandler } from "../middleware/errorHandler/ErrorHandler"
 
 const createCompany = async (req:Request, res:Response, next:NextFunction) => {
     let {name, logo, slug, profileUuid}:ICompany = req.body
 
     passport.authenticate("jwt", async (error, user) => {
         if(error || !user) {
-            return next( new HttpException(500, "Something went wrong while creating company"))
+            return next( ErrorHandler.internalServerError("Something went wrong while creating company"))
         }
         const companyOwner = user.id
         try {
             const profile = await Profile.findOne({where:{userId: companyOwner}})
                 if(profile == null) {
-                    return next( new HttpException(403,  "You must have profile to create a company"))
+                    return next( ErrorHandler.forbidden( "You must have profile to create a company"))
                 }
             if(name == null) {
                 name = `${profile.name}'s Company`
@@ -61,7 +61,7 @@ const getAllCompanies = async (req:Request, res:Response, next:NextFunction) => 
 const getOneCompany = async (req:Request, res:Response, next:NextFunction) => {
     const companyUuid = req.params.id 
     if(!isUuid.v4(companyUuid)) {
-        return next( new HttpException(400, "You must enter valid companyUuid"))
+        return next( ErrorHandler.badRequest("You must enter valid companyUuid"))
     }
     try {
         const company = await Company.findOne({
@@ -71,7 +71,7 @@ const getOneCompany = async (req:Request, res:Response, next:NextFunction) => {
             include: {model:Profile, as:"profiles"}
         })
         if(company == null) {
-            return next( new HttpException(404, "Can't find company."))
+            return next( ErrorHandler.notFound("Can't find company."))
         }
         res.json(company)
     } catch (error) {
@@ -89,11 +89,11 @@ const updateCompany = async (req:Request, res:Response, next:NextFunction) => {
     let {name, logo}:ICompany = req.body    
 
     if(!isUuid.v4(companyUuid)) {
-        return next( new HttpException(400, "You must enter valid companyUuid"))
+        return next( ErrorHandler.badRequest("You must enter valid companyUuid"))
     }
     passport.authenticate("jwt", async (error, user) => {
         if(error || !user) {
-            return next( new HttpException(500, "Something went wrong while updating company"))
+            return next( ErrorHandler.internalServerError("Something went wrong while updating company"))
         }
         console.log(req.user)
         try {
@@ -101,14 +101,14 @@ const updateCompany = async (req:Request, res:Response, next:NextFunction) => {
                 where:{companyUuid}
             })
             if(company == null) {
-            return next( new HttpException(404, "Company with this companyUuid doesn't exist"))
+            return next( ErrorHandler.notFound("Company with this companyUuid doesn't exist"))
             }
             if(user.id !== company.companyOwner) {
-                return next( new HttpException(403, "Not Authorized"))
+                return next( ErrorHandler.forbidden("Not Authorized"))
             }
             
             if(name == null) {
-                return next( new HttpException(400, "Name can't be empty"))
+                return next( ErrorHandler.badRequest("Name can't be empty"))
             }
     
             if(logo == null) {
@@ -136,19 +136,19 @@ const deleteCompany = async (req:Request, res:Response, next:NextFunction) => {
     const companyUuid = req.params.id 
 
     if(!isUuid.v4(companyUuid)) {
-        return next( new HttpException(400, "You must enter valid companyUuid"))
+        return next( ErrorHandler.badRequest("You must enter valid companyUuid"))
     }
     passport.authenticate("jwt", async (error, user) => {
         if(error || !user) {
-            return next( new HttpException(500, "Something went wrong while deleting company"))
+            return next( ErrorHandler.internalServerError("Something went wrong while deleting company"))
         }
         try {
             const company = await Company.findOne({where: {companyUuid}})
             if(company == null) {
-                return next( new HttpException(400, "Company with this companyUuid doesn't exist"))
+                return next( ErrorHandler.badRequest("Company with this companyUuid doesn't exist"))
             }
             if(user.id !== company.companyOwner) {
-                return next( new HttpException(403, "Not Authorized"))
+                return next( ErrorHandler.forbidden("Not Authorized"))
             }
 
             company.destroy()

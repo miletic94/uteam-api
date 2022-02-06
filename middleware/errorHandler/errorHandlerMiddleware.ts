@@ -1,17 +1,9 @@
 import { Request, Response, NextFunction, Application } from "express";
+import { ErrorHandler } from "./ErrorHandler";
 
-export class HttpException extends Error {
-    status: number;
-    message: string;
-    constructor(status: number, message: string) {
-      super(message);
-      this.status = status;
-      this.message = message;
-    }
-  }
 
 export default function errorHandler(
-    err:HttpException, 
+    err:ErrorHandler, 
     req:Request, 
     res:Response, 
     next:NextFunction) {
