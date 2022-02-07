@@ -148,7 +148,7 @@ const deleteCompany = async (req:Request, res:Response, next:NextFunction) => {
                 return next( ErrorHandler.badRequest("Company with this companyUuid doesn't exist"))
             }
             if(user.id !== company.companyOwner) {
-                return next( ErrorHandler.forbidden("Not Authorized"))
+                return next( ErrorHandler.methodNotAllowed("Not Allowed"))
             }
 
             company.destroy()

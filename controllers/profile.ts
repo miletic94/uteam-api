@@ -10,6 +10,7 @@ import { ErrorHandler } from "../middleware/errorHandler/ErrorHandler"
 
 const createProfile = async (req:Request, res:Response, next:NextFunction) => {
     const { status, name, profilePhoto, companyUuid }:IProfile = req.body 
+    console.log({profilePhoto})
     let userId: number
     let companyId: number | null = null
     if(name == null) {
@@ -114,9 +115,6 @@ const updateProfile = async (req:Request, res:Response, next:NextFunction) => {
             return next( ErrorHandler.internalServerError("Something went wrong while updating profile"))
         }
         try {
-            if(profileUuid == null || profileUuid.trim() == "") {
-                return next( ErrorHandler.badRequest("Must enter profileUuid"))
-            }
         
             const profile = await Profile.findOne({
                 where: {
@@ -188,7 +186,7 @@ const deleteProfile = async (req:Request, res:Response, next:NextFunction) => {
                 return next( ErrorHandler.notFound("Profile with this profileUuid doesn't exist"))
             }
             if(user.id !== profile.userId) {
-                return next( ErrorHandler.forbidden("Not Authorized"))
+                return next( ErrorHandler.methodNotAllowed("Not Allowed"))
             }
 
             profile.destroy()
