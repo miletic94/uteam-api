@@ -11,6 +11,7 @@ import { IProfile } from "../interfaces/profile"
 import { ICompany } from "../interfaces/company"
 import Company from "../models/company"
 import { ErrorHandler } from "../middleware/errorHandler/ErrorHandler"
+import slugify from "slugify"
 
 
 const register = async (req:Request, res:Response, next:NextFunction) => {
@@ -18,14 +19,6 @@ const register = async (req:Request, res:Response, next:NextFunction) => {
     const { status, name:profileName, profilePhoto }:IProfile = req.body.profile 
     let {name:companyName, logo, slug, companyOwner}:ICompany = req.body.company
     let userId:number
-
-    if(username == null || email == null || password == null ) {
-        return next( ErrorHandler.badRequest("Must enter username, email, and password"))
-    }
-    if(profileName == null) {
-        return next( ErrorHandler.badRequest( "Profile name can't be empty"))
-
-    }
     
     try {
         // Ako ima generic u Model<UserAttributes> onda izbacuje grešku kada se ovde ne implementira dobro. 
@@ -48,6 +41,7 @@ const register = async (req:Request, res:Response, next:NextFunction) => {
         if(companyName == null) {
             companyName = `${profile.name}'s Company`
         }
+        const slug = slugify(companyName) // if database doesn't handle this
         const company = await Company.create({
             name: companyName,
             logo,
@@ -107,16 +101,18 @@ const login = async (req:Request, res:Response, next:NextFunction) => {
 
 //HELPER CONTROLLERS - NOT FOR PRODUCTION
 const getAll = async (req:Request, res:Response, next:NextFunction) => {
+
     try {
         const users = await User.findAll({
             include: [
                 {model: Profile, as: "profile"}, 
                 {model:Company, as: "ownedCompanies"}
             ]
-        }
-        )
+        })
+        console.log({first:"first"});
         res.json(users)
     } catch (error) {
+        console.log(error)
         res.status(500).json({
             message: error.message,
             error
@@ -137,8 +133,10 @@ const deleteOne = async (req:Request, res:Response, next:NextFunction) => {
 
 
 const deleteAll = async (req:Request, res:Response, next:NextFunction) => {
+
+    
     await User.destroy({
-        where: {},
+        where: {}
         // truncate: true
     })
     next()

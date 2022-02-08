@@ -5,7 +5,7 @@ export enum Status {
 
 export interface IProfile {
     status: Status
-    name: string | undefined
+    name: string
     profilePhoto: string
     userUuid?: string
     companyUuid?: string

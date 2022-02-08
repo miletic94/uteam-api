@@ -4,14 +4,16 @@ import {
     getOneCompany,
     updateCompany, deleteCompany
 } from "../controllers/company"
+import { validateCompany } from "../middleware/validation/company"
+import { validateUuid } from "../middleware/validation/uuid"
 
 const router = express.Router()
 
+router.post("/companies", validateCompany, createCompany)
 router.get("/companies", getAllCompanies)
-router.post("/companies", createCompany)
-router.get("/companies/:id", getOneCompany)
-router.put("/companies/:id", updateCompany)
-router.delete("/companies/:id", deleteCompany)
+router.get("/companies/:id", validateUuid, getOneCompany)
+router.put("/companies/:id", validateCompany, updateCompany)
+router.delete("/companies/:id", validateUuid, deleteCompany)
 
 
 export = router

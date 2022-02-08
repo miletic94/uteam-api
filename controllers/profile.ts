@@ -5,18 +5,14 @@ import Company from "../models/company"
 import Profile from "../models/profile"
 import User from "../models/user"
 import { getIdFromUuid } from "../utils/utils"
-import isUuid from "is-uuid"
 import { ErrorHandler } from "../middleware/errorHandler/ErrorHandler"
 
 const createProfile = async (req:Request, res:Response, next:NextFunction) => {
-    const { status, name, profilePhoto, companyUuid }:IProfile = req.body 
-    console.log({profilePhoto})
+    const { status, name, profilePhoto, companyUuid }:IProfile = req.body.profile 
+
     let userId: number
     let companyId: number | null = null
-    if(name == null) {
-        return next( ErrorHandler.badRequest( "Must enter name"))
 
-    }
     passport.authenticate("jwt", async (error, user) => {
         if(error || !user) {
             return next( ErrorHandler.internalServerError("Something went wrong while creating profile"))
@@ -25,7 +21,7 @@ const createProfile = async (req:Request, res:Response, next:NextFunction) => {
 
         try {
             // TESTIRATI !!!
-            if(companyUuid && isUuid.v4(companyUuid)) {
+            if(companyUuid) {
                 companyId = await getIdFromUuid(
                     companyUuid, 
                     (companyUuid) => {
@@ -76,9 +72,7 @@ const getAllProfiles = async (req:Request, res:Response, next:NextFunction) => {
 
 const getOneProfile = async (req:Request, res:Response, next:NextFunction) => {
     const profileUuid = req.params.id 
-    if(!isUuid.v4(profileUuid)) {
-        return next(ErrorHandler.badRequest("You must enter valid profileUuid"))
-    }
+
     try {
         const profile = await Profile.findOne({
             where: {
@@ -106,10 +100,8 @@ const getOneProfile = async (req:Request, res:Response, next:NextFunction) => {
 
 const updateProfile = async (req:Request, res:Response, next:NextFunction) => {
     const profileUuid = req.params.id
-    let {name, profilePhoto, status}:IProfile = req.body
-    if(!isUuid.v4(profileUuid)) {
-        return next( ErrorHandler.badRequest("You must enter valid profileUuid"))
-    }
+    const { status, name, profilePhoto, companyUuid }:IProfile = req.body.profile 
+
     passport.authenticate("jwt", async (error, user) => {
         if(error || !user) {
             return next( ErrorHandler.internalServerError("Something went wrong while updating profile"))
@@ -128,7 +120,7 @@ const updateProfile = async (req:Request, res:Response, next:NextFunction) => {
                 return next( ErrorHandler.forbidden("Not Authorized"))
             }
             // To connect Profile to a Company (as employee)
-            const companyUuid:string | undefined = req.body.companyId
+
             
             const companyId = await getIdFromUuid(companyUuid, (companyUuid) => {
                 const company = Company.findOne({
@@ -139,14 +131,8 @@ const updateProfile = async (req:Request, res:Response, next:NextFunction) => {
                 return company
             }, true)
             //-----------------------------------------------// 
-            if(name == null) {
-                return next( ErrorHandler.badRequest("Name can't be empty"))
-            }
-        
-            if(profilePhoto == null) {
-                profilePhoto = "https://image.shutterstock.com/shutterstock/photos/1373616899/display_1500/stock-vector-hand-drawn-modern-man-avatar-profile-icon-or-portrait-icon-user-flat-avatar-icon-sign-1373616899.jpg"
-            }
-        
+            console.log({companyId});
+            console.log({updating: true})
             profile.set({
                 name,
                 profilePhoto,
@@ -169,9 +155,7 @@ const updateProfile = async (req:Request, res:Response, next:NextFunction) => {
 
 const deleteProfile = async (req:Request, res:Response, next:NextFunction) => {
     const profileUuid = req.params.id 
-    if(!isUuid.v4(profileUuid)) {
-        return next( ErrorHandler.badRequest("You must enter valid profileUuid"))
-    }
+
     passport.authenticate("jwt", async (error, user) => {
         if(error || !user) {
             return next( ErrorHandler.internalServerError("Something went wrong while deleting profile"))
@@ -186,7 +170,7 @@ const deleteProfile = async (req:Request, res:Response, next:NextFunction) => {
                 return next( ErrorHandler.notFound("Profile with this profileUuid doesn't exist"))
             }
             if(user.id !== profile.userId) {
-                return next( ErrorHandler.methodNotAllowed("Not Allowed"))
+                return next( ErrorHandler.methodNotAllowed("Not Authorized"))
             }
 
             profile.destroy()

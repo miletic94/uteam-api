@@ -4,11 +4,11 @@ import { ICompany } from "../interfaces/company"
 import Company from "../models/company"
 import Profile from "../models/profile"
 import User from "../models/user"
-import isUuid from "is-uuid"
 import { ErrorHandler } from "../middleware/errorHandler/ErrorHandler"
+import slugify from "slugify"
 
 const createCompany = async (req:Request, res:Response, next:NextFunction) => {
-    let {name, logo, slug, profileUuid}:ICompany = req.body
+    let {name, logo}:ICompany = req.body.company
 
     passport.authenticate("jwt", async (error, user) => {
         if(error || !user) {
@@ -23,7 +23,7 @@ const createCompany = async (req:Request, res:Response, next:NextFunction) => {
             if(name == null) {
                 name = `${profile.name}'s Company`
             }
-
+            const slug = slugify(name) // if database don't handle this
             const company = await Company.create({
                 name,
                 logo,
@@ -60,9 +60,6 @@ const getAllCompanies = async (req:Request, res:Response, next:NextFunction) => 
 
 const getOneCompany = async (req:Request, res:Response, next:NextFunction) => {
     const companyUuid = req.params.id 
-    if(!isUuid.v4(companyUuid)) {
-        return next( ErrorHandler.badRequest("You must enter valid companyUuid"))
-    }
     try {
         const company = await Company.findOne({
             where: {
@@ -86,16 +83,12 @@ const getOneCompany = async (req:Request, res:Response, next:NextFunction) => {
 
 const updateCompany = async (req:Request, res:Response, next:NextFunction) => {
     const companyUuid = req.params.id
-    let {name, logo}:ICompany = req.body    
+    let {name, logo}:ICompany = req.body.company    
 
-    if(!isUuid.v4(companyUuid)) {
-        return next( ErrorHandler.badRequest("You must enter valid companyUuid"))
-    }
     passport.authenticate("jwt", async (error, user) => {
         if(error || !user) {
             return next( ErrorHandler.internalServerError("Something went wrong while updating company"))
         }
-        console.log(req.user)
         try {
             const company = await Company.findOne({
                 where:{companyUuid}
@@ -106,18 +99,20 @@ const updateCompany = async (req:Request, res:Response, next:NextFunction) => {
             if(user.id !== company.companyOwner) {
                 return next( ErrorHandler.forbidden("Not Authorized"))
             }
-            
+            const companyOwner = user.id
+            const profile = await Profile.findOne({where:{userId: companyOwner}})
+            if(profile == null) {
+                return next( ErrorHandler.forbidden( "You must have profile to create a company"))
+            }
             if(name == null) {
-                return next( ErrorHandler.badRequest("Name can't be empty"))
+                name = `${profile.name}'s Company`
             }
-    
-            if(logo == null) {
-                logo = "https://cdn4.vectorstock.com/i/1000x1000/18/58/swoosh-generic-logo-vector-21061858.jpg"
-            }
-    
+
+            const slug = slugify(name) // if database don't handle this
             company.set({
                 name, 
-                logo
+                logo,
+                slug
             })
             company.save()
             res.json(company)
@@ -135,9 +130,6 @@ const updateCompany = async (req:Request, res:Response, next:NextFunction) => {
 const deleteCompany = async (req:Request, res:Response, next:NextFunction) => {
     const companyUuid = req.params.id 
 
-    if(!isUuid.v4(companyUuid)) {
-        return next( ErrorHandler.badRequest("You must enter valid companyUuid"))
-    }
     passport.authenticate("jwt", async (error, user) => {
         if(error || !user) {
             return next( ErrorHandler.internalServerError("Something went wrong while deleting company"))

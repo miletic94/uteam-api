@@ -50,7 +50,7 @@ interface UserCreationAttributes extends Optional<UserAttributes, "userUuid"> {}
       allowNull: false,
       unique: true,
       validate: {
-        is: /^[a-zA-Z](?:[0-9][#%-_*])*/
+        is: /^[A-Za-z][a-z0-9#%\_\-\*)]*$/
       }
     },
     email: {
@@ -88,16 +88,6 @@ interface UserCreationAttributes extends Optional<UserAttributes, "userUuid"> {}
         email = email.toLowerCase()
         values.setDataValue("email", email)
       },
-      // Is this how beforeFind is supposed to work - not minding the usecase???
-      beforeFind(options) {
-        // @ts-ignore
-        let email = options.where.email
-        if(email && typeof email === "string") {
-          email = email.trim()
-          // @ts-ignore
-          options.where.email = email
-        }
-      },  
       async beforeSave(user) {
         const hashedPassword = await bcrypt.hash(user.password, 10)
         user.password = hashedPassword
