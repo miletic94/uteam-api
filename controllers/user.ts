@@ -38,10 +38,19 @@ const register = async (req:Request, res:Response, next:NextFunction) => {
             userId
         })
         companyOwner = user.id
+        // If user didn't enter companyName, we are making the default one.
+        // But if profile names are equal for 2 users, then company names 
+        // are going to be equal for them. We want to avoid prompting user
+        // to enter unique company name that he didn't enter in the first place. 
         if(companyName == null) {
             companyName = `${profile.name}'s Company`
+            if(await Company.findOne({where: {companyName}})){
+                companyName = `${companyName}-1`
+            }
         }
-        const slug = slugify(companyName) // if database doesn't handle this
+        // slug is here in case database doesn't handle this
+        const slug = slugify(companyName)
+        
         const company = await Company.create({
             companyName,
             logo,
