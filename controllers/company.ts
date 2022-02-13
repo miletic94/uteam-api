@@ -8,7 +8,7 @@ import { ErrorHandler } from "../middleware/errorHandler/ErrorHandler"
 import slugify from "slugify"
 
 const createCompany = async (req:Request, res:Response, next:NextFunction) => {
-    let {name, logo}:ICompany = req.body.company
+    let {companyName, logo}:ICompany = req.body.company
 
     passport.authenticate("jwt", async (error, user) => {
         if(error || !user) {
@@ -20,12 +20,12 @@ const createCompany = async (req:Request, res:Response, next:NextFunction) => {
                 if(profile == null) {
                     return next( ErrorHandler.forbidden( "You must have profile to create a company"))
                 }
-            if(name == null) {
-                name = `${profile.name}'s Company`
+            if(companyName == null) {
+                companyName = `${profile.name}'s Company`
             }
-            const slug = slugify(name) // if database don't handle this
+            const slug = slugify(companyName) // if database don't handle this
             const company = await Company.create({
-                name,
+                companyName,
                 logo,
                 slug,
                 companyOwner
@@ -83,7 +83,7 @@ const getOneCompany = async (req:Request, res:Response, next:NextFunction) => {
 
 const updateCompany = async (req:Request, res:Response, next:NextFunction) => {
     const companyUuid = req.params.id
-    let {name, logo}:ICompany = req.body.company    
+    let {companyName, logo}:ICompany = req.body.company    
 
     passport.authenticate("jwt", async (error, user) => {
         if(error || !user) {
@@ -104,13 +104,13 @@ const updateCompany = async (req:Request, res:Response, next:NextFunction) => {
             if(profile == null) {
                 return next( ErrorHandler.forbidden( "You must have profile to create a company"))
             }
-            if(name == null) {
-                name = `${profile.name}'s Company`
+            if(companyName == null) {
+                companyName = `${profile.name}'s Company`
             }
 
-            const slug = slugify(name) // if database don't handle this
+            const slug = slugify(companyName) // if database don't handle this
             company.set({
-                name, 
+                companyName, 
                 logo,
                 slug
             })

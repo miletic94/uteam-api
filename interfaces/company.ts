@@ -1,5 +1,5 @@
 export interface ICompany {
-    name: string
+    companyName: string
     logo: string
     profileUuid?: string
     slug: string

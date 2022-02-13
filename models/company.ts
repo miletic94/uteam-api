@@ -8,7 +8,7 @@ import User from './user';
 
 interface CompanyAttributes {
     companyUuid: string
-    name: string
+    companyName: string
     logo: string
     slug: string
     companyOwner: number
@@ -24,7 +24,7 @@ interface CompanyCreationAttributes extends Optional<CompanyAttributes, "company
     implements CompanyAttributes {
     companyUuid!: string;
     id!: number
-    name!:string
+    companyName!:string
     logo!: string
     slug!: string
     companyOwner!: number;
@@ -43,7 +43,7 @@ interface CompanyCreationAttributes extends Optional<CompanyAttributes, "company
       unique: true,
       allowNull: false
     },
-    name: {
+    companyName: {
       type: DataTypes.STRING,
       allowNull: false,
       unique: true
@@ -70,7 +70,7 @@ interface CompanyCreationAttributes extends Optional<CompanyAttributes, "company
     tableName: "companies",
     hooks: {
       beforeValidate(company) {
-        company.slug = slugify(company.name, {lower: true})
+        company.slug = slugify(company.companyName, {lower: true})
       }
     }
   });

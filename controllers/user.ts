@@ -17,7 +17,7 @@ import slugify from "slugify"
 const register = async (req:Request, res:Response, next:NextFunction) => {
     let {username, email, password, role}:IUser = req.body.user
     const { status, name:profileName, profilePhoto }:IProfile = req.body.profile 
-    let {name:companyName, logo, slug, companyOwner}:ICompany = req.body.company
+    let {companyName, logo, slug, companyOwner}:ICompany = req.body.company
     let userId:number
     
     try {
@@ -43,7 +43,7 @@ const register = async (req:Request, res:Response, next:NextFunction) => {
         }
         const slug = slugify(companyName) // if database doesn't handle this
         const company = await Company.create({
-            name: companyName,
+            companyName,
             logo,
             slug,
             companyOwner
