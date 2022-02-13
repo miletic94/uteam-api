@@ -13,6 +13,7 @@ import Company from "../models/company"
 import { ErrorHandler } from "../middleware/errorHandler/ErrorHandler"
 import slugify from "slugify"
 
+const filePath = process.env.NODE_ENV === "production"? null : __filename
 
 const register = async (req:Request, res:Response, next:NextFunction) => {
     let {username, email, password, role}:IUser = req.body.user

@@ -7,12 +7,14 @@ import User from "../models/user"
 import { ErrorHandler } from "../middleware/errorHandler/ErrorHandler"
 import slugify from "slugify"
 
+const filePath = process.env.NODE_ENV === "production"? null : __filename
+
 const createCompany = async (req:Request, res:Response, next:NextFunction) => {
     let {companyName, logo}:ICompany = req.body.company
 
     passport.authenticate("jwt", async (error, user) => {
         if(error || !user) {
-            return next( ErrorHandler.internalServerError("Something went wrong while creating company"))
+            return next( ErrorHandler.unauthorized("Not Authenticated", {filePath, ...error}))
         }
         const companyOwner = user.id
         try {
@@ -78,7 +80,7 @@ const updateCompany = async (req:Request, res:Response, next:NextFunction) => {
 
     passport.authenticate("jwt", async (error, user) => {
         if(error || !user) {
-            return next( ErrorHandler.internalServerError("Something went wrong while updating company"))
+            return next( ErrorHandler.unauthorized("Not Authenticated", {filePath, ...error}))
         }
         try {
             const company = await Company.findOne({
@@ -117,10 +119,9 @@ const updateCompany = async (req:Request, res:Response, next:NextFunction) => {
 
 const deleteCompany = async (req:Request, res:Response, next:NextFunction) => {
     const companyUuid = req.params.id 
-
     passport.authenticate("jwt", async (error, user) => {
         if(error || !user) {
-            return next( ErrorHandler.internalServerError("Something went wrong while deleting company"))
+            return next( ErrorHandler.unauthorized("Not Authenticated", {filePath, ...error}))
         }
         try {
             const company = await Company.findOne({where: {companyUuid}})

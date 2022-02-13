@@ -7,6 +7,8 @@ import User from "../models/user"
 import { getIdFromUuid } from "../utils/utils"
 import { ErrorHandler } from "../middleware/errorHandler/ErrorHandler"
 
+const filePath = process.env.NODE_ENV === "production"? null : __filename
+
 const createProfile = async (req:Request, res:Response, next:NextFunction) => {
     const { status, name, profilePhoto, companyUuid }:IProfile = req.body.profile 
 
@@ -15,7 +17,7 @@ const createProfile = async (req:Request, res:Response, next:NextFunction) => {
 
     passport.authenticate("jwt", async (error, user) => {
         if(error || !user) {
-            return next( ErrorHandler.internalServerError("Something went wrong while creating profile"))
+            return next( ErrorHandler.unauthorized("Not Authenticated", {filePath, ...error}))
         }
         userId = user.id
 
@@ -95,7 +97,7 @@ const updateProfile = async (req:Request, res:Response, next:NextFunction) => {
 
     passport.authenticate("jwt", async (error, user) => {
         if(error || !user) {
-            return next( ErrorHandler.internalServerError("Something went wrong while updating profile"))
+            return next( ErrorHandler.unauthorized("Not Authenticated", {filePath, ...error}))
         }
         try {
         
@@ -146,7 +148,7 @@ const deleteProfile = async (req:Request, res:Response, next:NextFunction) => {
 
     passport.authenticate("jwt", async (error, user) => {
         if(error || !user) {
-            return next( ErrorHandler.internalServerError("Something went wrong while deleting profile"))
+            return next( ErrorHandler.unauthorized("Not Authenticated", {filePath, ...error}))
         }
         try {
             const profile = await Profile.findOne({
