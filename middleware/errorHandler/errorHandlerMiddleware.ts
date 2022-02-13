@@ -10,11 +10,13 @@ export default function errorHandler(
 
     const status = (err.status || 500);
     const message = err.message || 'Something went wrong';
+    const error = err.error
     res
       .status(status)
       .send({
         status,
         message,
+        error
       })
 };
 

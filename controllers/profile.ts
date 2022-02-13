@@ -39,10 +39,7 @@ const createProfile = async (req:Request, res:Response, next:NextFunction) => {
             })
             return res.status(201).json(profile)
         } catch (error) {
-            res.status(500).json({
-                message: error.message,
-                error
-            })
+            next(ErrorHandler.internalServerError(error.message, error))
         }
     })(req, res, next)
     
@@ -63,10 +60,7 @@ const getAllProfiles = async (req:Request, res:Response, next:NextFunction) => {
         })
         res.json(profiles)
     } catch (error) {
-        res.status(500).json({
-            message: error.message,
-            error
-        })
+        next(ErrorHandler.internalServerError(error.message, error))
     }
 }
 
@@ -91,10 +85,7 @@ const getOneProfile = async (req:Request, res:Response, next:NextFunction) => {
         }
         res.json(profile)
     } catch (error) {
-        res.status(500).json({
-            message: error.message,
-            error
-        })
+        next(ErrorHandler.internalServerError(error.message, error))
     }
 }
 
@@ -144,10 +135,7 @@ const updateProfile = async (req:Request, res:Response, next:NextFunction) => {
     
             res.json(profile)
         } catch (error) {
-            res.status(500).json({
-                message: error.message,
-                error
-            })
+            next(ErrorHandler.internalServerError(error.message, error))
         }
     })(req, res, next)
 
@@ -179,10 +167,7 @@ const deleteProfile = async (req:Request, res:Response, next:NextFunction) => {
                 message: "Profile deleted"
             })
         } catch (error) {
-            res.status(500).json({
-                message: error.message,
-                error
-            })
+            next(ErrorHandler.internalServerError(error.message, error))
         }
     })(req, res, next)
     

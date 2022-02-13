@@ -64,10 +64,12 @@ const register = async (req:Request, res:Response, next:NextFunction) => {
         })
 
     } catch(error) {
-        return res.status(500).json({
-            message: error.message,
-            error
-        })
+        if(error.message === "Validation error") {
+            return next(ErrorHandler.badRequest(
+                error.errors[0].message, 
+                {value: error.errors[0].value}))
+        }
+        next(ErrorHandler.internalServerError(error.message, error))
     }
 }
 
@@ -121,11 +123,7 @@ const getAll = async (req:Request, res:Response, next:NextFunction) => {
         console.log({first:"first"});
         res.json(users)
     } catch (error) {
-        console.log(error)
-        res.status(500).json({
-            message: error.message,
-            error
-        })
+        next(ErrorHandler.internalServerError(error.message, error))
     }
     
 }

@@ -32,10 +32,7 @@ const createCompany = async (req:Request, res:Response, next:NextFunction) => {
             })
             res.json(company)
         } catch (error) {
-            res.status(500).json({
-                message: error.message,
-                error
-            })
+            next(ErrorHandler.internalServerError(error.message, error))
         }
     })(req, res, next)
 }
@@ -51,10 +48,7 @@ const getAllCompanies = async (req:Request, res:Response, next:NextFunction) => 
         })
         res.json(companies)
     } catch (error) {
-        res.status(500).json({
-            message: error.message,
-            error
-        })
+        next(ErrorHandler.internalServerError(error.message, error))
     }
 }
 
@@ -72,10 +66,7 @@ const getOneCompany = async (req:Request, res:Response, next:NextFunction) => {
         }
         res.json(company)
     } catch (error) {
-        res.status(500).json({
-            message: error.message,
-            error
-        })
+        next(ErrorHandler.internalServerError(error.message, error))
     }
 }
 
@@ -118,10 +109,7 @@ const updateCompany = async (req:Request, res:Response, next:NextFunction) => {
             res.json(company)
     
         } catch (error) {
-            res.status(500).json({
-                message: error.message,
-                error
-            })
+            next(ErrorHandler.internalServerError(error.message, error))
         }
     })(req, res, next)
     
@@ -149,10 +137,7 @@ const deleteCompany = async (req:Request, res:Response, next:NextFunction) => {
                 message: "Company deleted"
             })
         } catch (error) {
-            res.status(500).json({
-                message: error.message,
-                error
-            })
+            next(ErrorHandler.internalServerError(error.message, error))
         }
         
     })(req, res, next)
