@@ -71,7 +71,7 @@ interface OptionalAttributes extends Optional<ProfileCreationAttributes, "compan
     },
     companyId: {
       type: DataTypes.INTEGER,
-      unique: true,
+      unique: false,
       allowNull: true
   }
   }, {

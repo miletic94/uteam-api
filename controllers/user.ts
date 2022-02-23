@@ -1,125 +1,137 @@
 import {Request, Response, NextFunction } from "express"
-import bcrypt from "bcrypt"
-import { IUser, Role } from "../interfaces/user"
+import { IUser } from "../interfaces/user"
 import signJWT from "../utils/signJWT"
-import { checkRegex } from "../utils/utils"
+import  passport  from "passport"
 
 import User from "../models/user"
 import Profile from "../models/profile"
 
+import {initializeLocalStrategy} from "../strategies/local"
+import { IProfile } from "../interfaces/profile"
+import { ICompany } from "../interfaces/company"
+import Company from "../models/company"
+import { ErrorHandler } from "../middleware/errorHandler/ErrorHandler"
+import slugify from "slugify"
+
+const filePath = process.env.NODE_ENV === "production"? null : __filename
+
 const register = async (req:Request, res:Response, next:NextFunction) => {
-    let {username, email, password, role}:IUser = req.body
-
-    if(username == null || email == null || password == null ) {
-        return res.status(400).json({
-            message: "Must enter username, email, and password"
-        })
-    }
+    let {username, email, password, role}:IUser = req.body.user
+    const { status, name:profileName, profilePhoto }:IProfile = req.body.profile 
+    let {companyName, logo, slug, companyOwner}:ICompany = req.body.company
+    let userId:number
     
-    if(!checkRegex(/^[a-zA-Z](?:[0-9][#%-_*])*/, username)) {
-        return res.status(400).json({
-            message: "Username starts with character, contains characters, numbers and any of this symbols: #, %, -, _, *. Choose wisely"
-        })
-    }
-
-    if(password.length < 6) {
-        return res.status(400).json({
-            message: "Password must be at least 6 characters long"
-        })
-    }
-
-    if(role == null || (!Object.values(Role).includes(role))) {
-        role = Role.USER
-    }
-
     try {
-        const  hashedPassword = await bcrypt.hash(password, 10)
         // Ako ima generic u Model<UserAttributes> onda izbacuje grešku kada se ovde ne implementira dobro. 
         // U suprotnom ne reaguje
         const user = await User.create({
-            username: username,
-            email: email,
-            password: hashedPassword,
+            username,
+            email,
+            password,
             role
         })
 
-        res.status(201).json(user)
+        userId = user.id
+        const profile = await Profile.create({
+            name: profileName,
+            status,
+            profilePhoto,
+            userId
+        })
+        companyOwner = user.id
+        // If user didn't enter companyName, we are making the default one.
+        // But if profile names are equal for 2 users, then company names 
+        // are going to be equal for them. We want to avoid prompting user
+        // to enter unique company name that he didn't enter in the first place. 
+        if(companyName == null) {
+            companyName = `${profile.name}'s Company`
+            if(await Company.findOne({where: {companyName}})){
+                companyName = `${companyName}-1`
+            }
+        }
+        // slug is here in case database doesn't handle this
+        const slug = slugify(companyName)
+        
+        const company = await Company.create({
+            companyName,
+            logo,
+            slug,
+            companyOwner
+        })
+        res.status(201).json({
+            "user": user,
+            "profile": profile,
+            "company": company
+        })
 
     } catch(error) {
-        return res.status(500).json({
-            message: error.message,
-            error
-        })
+        if(error.message === "Validation error") {
+            return next(ErrorHandler.badRequest(
+                error.errors[0].message, 
+                {value: error.errors[0].value}))
+        }
+        next(ErrorHandler.internalServerError(error.message, error))
     }
 }
+
 
 const login = async (req:Request, res:Response, next:NextFunction) => {
-    const {username, email, password}:IUser = req.body
+    const {username, email}:IUser = req.body
     if(username == null && email == null) {
-        return res.status(400).json({
-            message: "You must enter email or password"
-        })
+        return next(ErrorHandler.badRequest("You must enter username or email"))
     }
-    try {
-        const user = username ? 
-            await User.findOne({where: {username}}):
-            await User.findOne({where: {email}})
+    if(username) {
+        initializeLocalStrategy("username", username, passport)
 
-        if(user == null) {
-            return res.status(406).json({ // PRODUCTION??
-                message: "Can't find user"
-            })
+    } else if (email) {
+        initializeLocalStrategy("email", email, passport)
+    }
+    passport.authenticate("local", (error, user:IUser, info) => {
+        if(error) {
+        return next( ErrorHandler.internalServerError(error.message))
+    
         }
-
-        if (await bcrypt.compare(password, user.password)) {
+        if(user) {
             signJWT(user, (error, token) => {
                 if(error) {
-                    return res.status(500).json({
-                        message: error.message,
-                        error
-                    })
+                    return next( ErrorHandler.internalServerError(error.message))
                 }
                 if(token) {
-                    return res.status(200).json({
+                    res.json({
                         message: "OK",
-                        token
+                        token: `Bearer ${token}`
                     })
-                }
+                } 
             })
         } else {
-            res.status(403).json({
-                message: "Not Allowed"
-            })
+            return res.json(info)
         }
-
-    } catch (error) {
-        res.status(500).json({
-            message: error.message,
-            error
-        })
-    }
-
+    })(req, res, next)
 }
+
 
 
 //HELPER CONTROLLERS - NOT FOR PRODUCTION
 const getAll = async (req:Request, res:Response, next:NextFunction) => {
+
     try {
         const users = await User.findAll({
-            include: [{model: Profile, as: "profile"}]
-        }
-        )
+            include: [
+                {model: Profile, as: "profile"}, 
+                {model:Company, as: "ownedCompanies"}
+            ]
+        })
+        console.log({first:"first"});
         res.json(users)
     } catch (error) {
-        res.status(500).json({
-            message: error.message
-        })
+        next(ErrorHandler.internalServerError(error.message, error))
     }
     
 }
+
+// Not from assigment
 const deleteOne = async (req:Request, res:Response, next:NextFunction) => {
     const userUuid = req.params.id
-    console.log(userUuid);
     await User.destroy({
         where: {userUuid},
         truncate: false
@@ -129,8 +141,10 @@ const deleteOne = async (req:Request, res:Response, next:NextFunction) => {
 
 
 const deleteAll = async (req:Request, res:Response, next:NextFunction) => {
+
+    
     await User.destroy({
-        where: {},
+        where: {}
         // truncate: true
     })
     next()

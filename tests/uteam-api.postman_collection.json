@@ -1,0 +1,2355 @@
+{
+	"info": {
+		"_postman_id": "e941e2ef-0bb4-4d19-ac61-06b1c8abcda0",
+		"name": "uteam-api",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Basic routes",
+			"item": [
+				{
+					"name": "HEALTH CHECK",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}",
+							"host": [
+								"{{baseUrl}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "REGISTER USER John",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 201\", function () {\r",
+									"    pm.response.to.have.status(201);\r",
+									"});\r",
+									"\r",
+									"//*************/\r",
+									"const uuid = pm.response.json()[\"user\"][\"userUuid\"]\r",
+									"const name = pm.response.json()[\"user\"][\"username\"]\r",
+									"const profileUuid = pm.response.json()[\"profile\"][\"profileUuid\"]\r",
+									"const companyUuid = `${pm.response.json()[\"company\"][\"companyUuid\"]}`\r",
+									"\r",
+									"pm.collectionVariables.set(\"userUuid\", uuid)\r",
+									"pm.collectionVariables.set(\"userName\", name)\r",
+									"pm.collectionVariables.set(\"profile_uuid\", profileUuid)\r",
+									"pm.collectionVariables.set(\"company_uuid\", companyUuid)\r",
+									"\r",
+									"\r",
+									""
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "basic"
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"test\": \"\",\r\n    \"user\": {\r\n        \"username\": \"john\",\r\n        \"email\": \"john@email.com\",\r\n        \"password\": \"123456\",\r\n        \"role\": \"company\"\r\n    },\r\n    \"profile\": {\r\n        \"name\": \"John\"\r\n    },\r\n    \"company\": {\r\n\r\n    }\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/register",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"register"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "REGISTER USER Sena",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 201\", function () {\r",
+									"    pm.response.to.have.status(201);\r",
+									"});\r",
+									"\r",
+									"//*************/\r",
+									"const uuid = pm.response.json()[\"user\"][\"userUuid\"]\r",
+									"const name = pm.response.json()[\"user\"][\"username\"]\r",
+									"const profileUuid = pm.response.json()[\"profile\"][\"profileUuid\"]\r",
+									"const companyUuid = pm.response.json()[\"company\"][\"companyUuid\"]\r",
+									"\r",
+									"pm.collectionVariables.set(\"userUuid\", uuid)\r",
+									"pm.collectionVariables.set(\"userName\", name)\r",
+									"pm.collectionVariables.set(\"profile_uuid\", profileUuid)\r",
+									"pm.collectionVariables.set(\"company_uuid\", companyUuid)\r",
+									"\r",
+									"\r",
+									""
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "basic"
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"user\": {\r\n        \"username\": \"sena\",\r\n        \"email\": \"sena@email.com\",\r\n        \"password\": \"123456\"\r\n    },\r\n    \"profile\": {\r\n        \"name\": \"Sena\"\r\n    },\r\n    \"company\": {\r\n\r\n    }\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/register",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"register"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "LOGIN BY USERNAME",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});\r",
+									"\r",
+									"//************************ */\r",
+									"\r",
+									"const userToken = pm.response.json()[\"token\"]\r",
+									"const token = userToken.split(\" \")[1]\r",
+									"pm.collectionVariables.set(\"token\", token)\r",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "basic"
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"username\": \"john\",\r\n    \"password\": \"123456\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/login",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"login"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "LOGIN BY EMAIL",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});\r",
+									"\r",
+									"//************************ */\r",
+									"\r",
+									"const userToken = pm.response.json()[\"token\"]\r",
+									"const token = userToken.split(\" \")[1]\r",
+									"pm.collectionVariables.set(\"token\", token)"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "basic"
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"email\": \"john@email.com\",\r\n    \"password\": \"123456\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/login",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"login"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "GET ALL USERS",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"const response = pm.response.json()\r",
+									"\r",
+									"pm.test(\"First user's username to be john\", () => {\r",
+									"    pm.expect(response[0].username).eql(\"john\")\r",
+									"})"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/get/all/users",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"get",
+								"all",
+								"users"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "RESET (Delete All Users)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"const response = pm.response.json() \r",
+									"\r",
+									"pm.test(\"Response to be empty\", () => {\r",
+									"    pm.expect(response).eql([])\r",
+									"})\r",
+									"\r",
+									"pm.environment.clear()\r",
+									"pm.collectionVariables.clear()\r",
+									"\r",
+									"const baseUrl = \"http://localhost:5000\"\r",
+									"pm.collectionVariables.set(\"baseUrl\", baseUrl)"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"password\": \"Nm1006357619!\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/delete/all/users",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"delete",
+								"all",
+								"users"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "REGISTER PROFILE",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"\r",
+									""
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"const profileUuid = pm.response.json()[\"profile\"][\"profileUuid\"]\r",
+									"\r",
+									"pm.collectionVariables.set(\"profile_uuid\", profileUuid)\r",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"profile\": {\r\n        \"name\": \"John\"\r\n    }\r\n}\r\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/profiles",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"profiles"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "GET ONE PROFILE BY ID",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/profiles/{{profile_uuid}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"profiles",
+								"{{profile_uuid}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "GET ALL PROFILES",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/profiles/",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"profiles",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "UPDATE PROFILE",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"const response = pm.response.json()\r",
+									"\r",
+									"console.log(response.name)"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"profile\": {\r\n        \"name\": \"Nemanja\",\r\n        \"companyId\": \"{{company_uuid}}\",\r\n        \"status\": \"a\"\r\n    }\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/profiles/{{profile_uuid}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"profiles",
+								"{{profile_uuid}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "DELETE PROFILE",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "DELETE",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/profiles/{{profile_uuid}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"profiles",
+								"{{profile_uuid}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "CREATE COMPANY",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"const companyUuid = `${pm.response.json()[\"company\"][\"companyUuid\"]}`\r",
+									"\r",
+									"pm.collectionVariables.set(\"company_uuid\", companyUuid)\r",
+									"\r",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"company\":{\r\n        \"name\": \"lab\"\r\n    }\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/companies",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"companies"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "GET ONE COMPANY BY ID",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"console.log(pm.collectionVariables.get(\"company_uuid\"))"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/companies/{{company_uuid}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"companies",
+								"{{company_uuid}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "GET ALL COMPANIES",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/companies",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"companies"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "UPDATE COMPANY",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"const response = pm.response.json()\r",
+									"\r",
+									"console.log(response.name)"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"company\": {\r\n        \"name\":\"nemanja\"\r\n    }\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/companies/{{company_uuid}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"companies",
+								"{{company_uuid}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "DELETE COMPANY",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "DELETE",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/companies/{{company_uuid}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"companies",
+								"{{company_uuid}}"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Get hired in company",
+			"item": [
+				{
+					"name": "REGISTER USER John",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 201\", function () {\r",
+									"    pm.response.to.have.status(201);\r",
+									"});\r",
+									"\r",
+									"//*************/\r",
+									"const uuid = pm.response.json()[\"user\"][\"userUuid\"]\r",
+									"const name = pm.response.json()[\"user\"][\"username\"]\r",
+									"const profileUuid = pm.response.json()[\"profile\"][\"profileUuid\"]\r",
+									"\r",
+									"\r",
+									"pm.collectionVariables.set(\"userUuid\", uuid)\r",
+									"pm.collectionVariables.set(\"userName\", name)\r",
+									"pm.collectionVariables.set(\"profile_uuid\", profileUuid)\r",
+									"\r",
+									"\r",
+									""
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "basic"
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"test\": \"\",\r\n    \"user\": {\r\n        \"username\": \"john\",\r\n        \"email\": \"john@email.com\",\r\n        \"password\": \"123456\",\r\n        \"role\": \"company\"\r\n    },\r\n    \"profile\": {\r\n        \"name\": \"John\"\r\n    },\r\n    \"company\": {\r\n\r\n    }\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/register",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"register"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "REGISTER USER Sena",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 201\", function () {\r",
+									"    pm.response.to.have.status(201);\r",
+									"});\r",
+									"\r",
+									"//*************/\r",
+									"const uuid = pm.response.json()[\"user\"][\"userUuid\"]\r",
+									"const name = pm.response.json()[\"user\"][\"username\"]\r",
+									"const companyUuid = pm.response.json()[\"company\"][\"companyUuid\"]\r",
+									"\r",
+									"pm.collectionVariables.set(\"userUuid\", uuid)\r",
+									"pm.collectionVariables.set(\"userName\", name)\r",
+									"pm.collectionVariables.set(\"company_uuid\", companyUuid)\r",
+									"\r",
+									"\r",
+									""
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "basic"
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"user\": {\r\n        \"username\": \"sena\",\r\n        \"email\": \"sena@email.com\",\r\n        \"password\": \"123456\"\r\n    },\r\n    \"profile\": {\r\n        \"name\": \"Sena\"\r\n    },\r\n    \"company\": {\r\n\r\n    }\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/register",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"register"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "LOGIN John",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});\r",
+									"\r",
+									"//************************ */\r",
+									"\r",
+									"const userToken = pm.response.json()[\"token\"]\r",
+									"const token = userToken.split(\" \")[1]\r",
+									"pm.collectionVariables.set(\"token\", token)\r",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "basic"
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"username\": \"john\",\r\n    \"password\": \"123456\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/login",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"login"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "UPDATE PROFILE",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"const response = pm.response.json()\r",
+									"const name = response.name\r",
+									"\r",
+									"pm.test(\"Name to be Nemanja\", () => {\r",
+									"    pm.expect(name).to.be.eql(\"Nemanja\")\r",
+									"})"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"profile\": {\r\n        \"name\": \"Nemanja\",\r\n        \"companyUuid\": \"{{company_uuid}}\",\r\n        \"status\": \"a\"\r\n    }\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/profiles/{{profile_uuid}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"profiles",
+								"{{profile_uuid}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "GET ALL PROFILES",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"const response = pm.response.json()\r",
+									"\r",
+									"const companyName = response[0].company.name \r",
+									"\r",
+									"pm.test(\"Company name to be 'Sena's company\", () => {\r",
+									"    pm.expect(companyName).to.be.eql(\"Sena's Company\")\r",
+									"})"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/profiles/",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"profiles",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "GET ALL COMPANIES",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"const response = pm.response.json()\r",
+									"\r",
+									"const employee = response[0].profiles[0].name\r",
+									"\r",
+									"pm.test(\"Employee's name to be Nemanja\", () => {\r",
+									"    pm.expect(employee).to.be.eql(\"Nemanja\")\r",
+									"})"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/companies",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"companies"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "RESET (Delete All Users)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"const response = pm.response.json() \r",
+									"\r",
+									"pm.test(\"Response to be empty\", () => {\r",
+									"    pm.expect(response).eql([])\r",
+									"})\r",
+									"\r",
+									"pm.environment.clear()\r",
+									"pm.collectionVariables.clear()\r",
+									"\r",
+									"const baseUrl = \"http://localhost:5000\"\r",
+									"pm.collectionVariables.set(\"baseUrl\", baseUrl)"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"password\": \"Nm1006357619!\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/delete/all/users",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"delete",
+								"all",
+								"users"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Sena the Hacker",
+			"item": [
+				{
+					"name": "REGISTER USER Sena",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 201\", function () {\r",
+									"    pm.response.to.have.status(201);\r",
+									"});\r",
+									"\r",
+									"//*************/\r",
+									"const uuid = pm.response.json()[\"user\"][\"userUuid\"]\r",
+									"const name = pm.response.json()[\"user\"][\"username\"]\r",
+									"const profileUuid = pm.response.json()[\"profile\"][\"profileUuid\"]\r",
+									"const companyUuid = pm.response.json()[\"company\"][\"companyUuid\"]\r",
+									"\r",
+									"pm.collectionVariables.set(\"userUuid\", uuid)\r",
+									"pm.collectionVariables.set(\"userName\", name)\r",
+									"pm.collectionVariables.set(\"profile_uuid\", profileUuid)\r",
+									"pm.collectionVariables.set(\"company_uuid\", companyUuid)\r",
+									"\r",
+									"\r",
+									""
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "basic"
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"user\": {\r\n        \"username\": \"sena\",\r\n        \"email\": \"sena@email.com\",\r\n        \"password\": \"123456\"\r\n    },\r\n    \"profile\": {\r\n        \"name\": \"Sena\"\r\n    },\r\n    \"company\": {\r\n\r\n    }\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/register",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"register"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "LOGIN Sena",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});\r",
+									"\r",
+									"//************************ */\r",
+									"\r",
+									"const userToken = pm.response.json()[\"token\"]\r",
+									"const token = userToken.split(\" \")[1]\r",
+									"pm.collectionVariables.set(\"token\", token)\r",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "basic"
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"username\": \"sena\",\r\n    \"password\": \"123456\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/login",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"login"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "REGISTER USER John",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 201\", function () {\r",
+									"    pm.response.to.have.status(201);\r",
+									"});\r",
+									"\r",
+									"//*************/\r",
+									"const uuid = pm.response.json()[\"user\"][\"userUuid\"]\r",
+									"const name = pm.response.json()[\"user\"][\"username\"]\r",
+									"const profileUuid = pm.response.json()[\"profile\"][\"profileUuid\"]\r",
+									"const companyUuid = pm.response.json()[\"company\"][\"companyUuid\"]\r",
+									"\r",
+									"pm.collectionVariables.set(\"userUuid\", uuid)\r",
+									"pm.collectionVariables.set(\"userName\", name)\r",
+									"pm.collectionVariables.set(\"profile_uuid\", profileUuid)\r",
+									"pm.collectionVariables.set(\"company_uuid\", companyUuid)\r",
+									"\r",
+									"\r",
+									""
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "basic"
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"user\": {\r\n        \"username\": \"john\",\r\n        \"email\": \"john@email.com\",\r\n        \"password\": \"123456\",\r\n        \"role\": \"superadmin\"\r\n    },\r\n    \"profile\": {\r\n        \"name\": \"John\"\r\n    },\r\n    \"company\": {\r\n\r\n    }\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/register",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"register"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "DELETE PROFILE",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Message to be 'Not Authorized'\", () => {\r",
+									"    const message = pm.response.json().message\r",
+									"    pm.expect(message).to.be.eql(\"Not Authorized\")\r",
+									"})\r",
+									"\r",
+									"pm.collectionVariables.unset(\"token\")\r",
+									"\r",
+									"pm.collectionVariables.unset(\"userUuid\")\r",
+									"pm.collectionVariables.unset(\"userName\")\r",
+									"pm.collectionVariables.unset(\"profile_uuid\")\r",
+									"pm.collectionVariables.unset(\"company_uuid\")\r",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "DELETE",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/profiles/{{profile_uuid}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"profiles",
+								"{{profile_uuid}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "RESET (Delete All Users)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"const response = pm.response.json() \r",
+									"\r",
+									"pm.test(\"Response to be empty\", () => {\r",
+									"    pm.expect(response).eql([])\r",
+									"})\r",
+									"\r",
+									"pm.environment.clear()\r",
+									"pm.collectionVariables.clear()\r",
+									"\r",
+									"const baseUrl = \"http://localhost:5000\"\r",
+									"pm.collectionVariables.set(\"baseUrl\", baseUrl)"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"password\": \"Nm1006357619!\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/delete/all/users",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"delete",
+								"all",
+								"users"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "No profile - can't create company",
+			"item": [
+				{
+					"name": "REGISTER USER John",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 201\", function () {\r",
+									"    pm.response.to.have.status(201);\r",
+									"});\r",
+									"\r",
+									"//*************/\r",
+									"const uuid = pm.response.json()[\"user\"][\"userUuid\"]\r",
+									"const name = pm.response.json()[\"user\"][\"username\"]\r",
+									"const profileUuid = pm.response.json()[\"profile\"][\"profileUuid\"]\r",
+									"const companyUuid = pm.response.json()[\"company\"][\"companyUuid\"]\r",
+									"\r",
+									"pm.collectionVariables.set(\"userUuid\", uuid)\r",
+									"pm.collectionVariables.set(\"userName\", name)\r",
+									"pm.collectionVariables.set(\"profile_uuid\", profileUuid)\r",
+									"pm.collectionVariables.set(\"company_uuid\", companyUuid)\r",
+									"\r",
+									"\r",
+									""
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "basic"
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"user\": {\r\n        \"username\": \"john\",\r\n        \"email\": \"john@email.com\",\r\n        \"password\": \"123456\"\r\n    },\r\n    \"profile\": {\r\n        \"name\": \"John\"\r\n    },\r\n    \"company\": {\r\n\r\n    }\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/register",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"register"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "LOGIN John",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});\r",
+									"\r",
+									"//************************ */\r",
+									"\r",
+									"const userToken = pm.response.json()[\"token\"]\r",
+									"const token = userToken.split(\" \")[1]\r",
+									"pm.collectionVariables.set(\"token\", token)\r",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "basic"
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"username\": \"john\",\r\n    \"password\": \"123456\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/login",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"login"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "DELETE PROFILE",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Response status to be 200\", () => {\r",
+									"    pm.expect(pm.response).to.have.status(200)\r",
+									"})\r",
+									"\r",
+									"console.log(pm.response.json().message)\r",
+									"\r",
+									"pm.test(\"Response message to be 'Profile deleted'\", () => {\r",
+									"    pm.expect(pm.response.json().message).to.eql(\"Profile deleted\")\r",
+									"})"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "DELETE",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/profiles/{{profile_uuid}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"profiles",
+								"{{profile_uuid}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "CREATE COMPANY",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"let companyUuid = pm.response.json().companyUuid\r",
+									"\r",
+									"pm.collectionVariables.set(\"company_uuid\", companyUuid)\r",
+									"\r",
+									"//===============================================/\r",
+									"\r",
+									"pm.test(\"Response code to be 403\", () => {\r",
+									"    pm.response.to.have.status(403)\r",
+									"})\r",
+									"\r",
+									"pm.test(\"Response message to be 'You must have profile to create a company'\", () => {\r",
+									"    const message = pm.response.json().message\r",
+									"    console.log(message)\r",
+									"    pm.expect(message).to.eql(\"You must have profile to create a company\")\r",
+									"})"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "\r\n{\r\n    \"name\": \"lab\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/companies",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"companies"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "RESET (Delete All Users)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"const response = pm.response.json() \r",
+									"\r",
+									"pm.test(\"Response to be empty\", () => {\r",
+									"    pm.expect(response).eql([])\r",
+									"})\r",
+									"\r",
+									"pm.environment.clear()\r",
+									"pm.collectionVariables.clear()\r",
+									"\r",
+									"const baseUrl = \"http://localhost:5000\"\r",
+									"pm.collectionVariables.set(\"baseUrl\", baseUrl)"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"password\": \"Nm1006357619!\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/delete/all/users",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"delete",
+								"all",
+								"users"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "No token requests",
+			"item": [
+				{
+					"name": "DELETE PROFILE",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Response status to be 500\", () => {\r",
+									"    pm.expect(pm.response.to.have.status(500))\r",
+									"})\r",
+									"\r",
+									"pm.test(\"Response message to be 'Something went wrong while deleting profile'\", () => {\r",
+									"    pm.expect(pm.response.json().message).to.eql(\"Something went wrong while deleting profile\")\r",
+									"})\r",
+									"\r",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "DELETE",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/profiles/{{profile_uuid}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"profiles",
+								"{{profile_uuid}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "DELETE COMPANY",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Response status to be 500\", () => {\r",
+									"    pm.expect(pm.response.to.have.status(500))\r",
+									"})\r",
+									"\r",
+									"pm.test(\"Response message to be 'Something went wrong while deleting company'\", () => {\r",
+									"    pm.expect(pm.response.json().message).to.eql(\"Something went wrong while deleting company\")\r",
+									"})\r",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "",
+									"type": "string"
+								}
+							]
+						},
+						"method": "DELETE",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/companies/{{company_uuid}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"companies",
+								"{{company_uuid}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "REGISTER PROFILE",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"\r",
+									""
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Response status to be 500\", () => {\r",
+									"    pm.expect(pm.response.to.have.status(500))\r",
+									"})\r",
+									"\r",
+									"pm.test(\"Response message to be 'Something went wrong while creating profile'\", () => {\r",
+									"    pm.expect(pm.response.json().message).to.eql(\"Something went wrong while creating profile\")\r",
+									"})\r",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"profile\": {\r\n        \"name\": \"John\"\r\n    }\r\n}\r\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/profiles",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"profiles"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "CREATE COMPANY",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Response status to be 500\", () => {\r",
+									"    pm.expect(pm.response.to.have.status(500))\r",
+									"})\r",
+									"\r",
+									"pm.test(\"Response message to be 'Something went wrong while creating company'\", () => {\r",
+									"    pm.expect(pm.response.json().message).to.eql(\"Something went wrong while creating company\")\r",
+									"})\r",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "\r\n{\r\n    \"name\": \"lab\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/companies",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"companies"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "UPDATE PROFILE",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Response status to be 500\", () => {\r",
+									"    pm.expect(pm.response.to.have.status(500))\r",
+									"})\r",
+									"\r",
+									"\r",
+									"pm.test(\"Response message to be 'Something went wrong while updating profile'\", () => {\r",
+									"    pm.expect(pm.response.json().message).to.eql(\"Something went wrong while updating profile\")\r",
+									"})\r",
+									""
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"profile\":{    \r\n        \"name\": \"Nemanja\",\r\n        \"companyId\": \"{{company_uuid}}\",\r\n        \"status\": \"pending\"\r\n    }\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/profiles/{{profile_uuid}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"profiles",
+								"{{profile_uuid}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "UPDATE COMPANY",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Response status to be 500\", () => {\r",
+									"    pm.expect(pm.response.to.have.status(500))\r",
+									"})\r",
+									"\r",
+									"pm.test(\"Response message to be 'Something went wrong while updating company'\", () => {\r",
+									"    pm.expect(pm.response.json().message).to.eql(\"Something went wrong while updating company\")\r",
+									"})\r",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"name\": \"sabrana dela\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/companies/{{company_uuid}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"companies",
+								"{{company_uuid}}"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Hellper tests (not in prod)",
+			"item": [
+				{
+					"name": "GET ALL USERS",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:5000/get/all/users",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"get",
+								"all",
+								"users"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "RESET (Delete All Users)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"const response = pm.response.json() \r",
+									"\r",
+									"pm.test(\"Response to be empty\", () => {\r",
+									"    pm.expect(response).eql([])\r",
+									"})\r",
+									"\r",
+									"pm.environment.clear()\r",
+									"pm.collectionVariables.clear()\r",
+									"\r",
+									"const baseUrl = \"http://localhost:5000\"\r",
+									"pm.collectionVariables.set(\"baseUrl\", baseUrl)"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"password\": \"Nm1006357619!\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/delete/all/users",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"delete",
+								"all",
+								"users"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Validation",
+			"item": []
+		},
+		{
+			"name": "Company with same name - over profile name",
+			"item": [
+				{
+					"name": "REGISTER John Snow",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 201\", function () {\r",
+									"    pm.response.to.have.status(201);\r",
+									"});\r",
+									"\r",
+									"//*************/\r",
+									"const uuid = pm.response.json()[\"user\"][\"userUuid\"]\r",
+									"const name = pm.response.json()[\"user\"][\"username\"]\r",
+									"const profileUuid = pm.response.json()[\"profile\"][\"profileUuid\"]\r",
+									"const companyUuid = `${pm.response.json()[\"company\"][\"companyUuid\"]}`\r",
+									"\r",
+									"pm.collectionVariables.set(\"userUuid\", uuid)\r",
+									"pm.collectionVariables.set(\"userName\", name)\r",
+									"pm.collectionVariables.set(\"profile_uuid\", profileUuid)\r",
+									"pm.collectionVariables.set(\"company_uuid\", companyUuid)\r",
+									"\r",
+									"\r",
+									""
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "basic"
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"test\": \"\",\r\n    \"user\": {\r\n        \"username\": \"john_snow\",\r\n        \"email\": \"john_snow@email.com\",\r\n        \"password\": \"123456\",\r\n        \"role\": \"company\"\r\n    },\r\n    \"profile\": {\r\n        \"name\": \"John\"\r\n    },\r\n    \"company\": {\r\n\r\n    }\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/register",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"register"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "REGISTER John Doe",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 201\", function () {\r",
+									"    pm.response.to.have.status(201);\r",
+									"});\r",
+									"\r",
+									"//*************/\r",
+									"const uuid = pm.response.json()[\"user\"][\"userUuid\"]\r",
+									"const name = pm.response.json()[\"user\"][\"username\"]\r",
+									"const profileUuid = pm.response.json()[\"profile\"][\"profileUuid\"]\r",
+									"const companyUuid = pm.response.json()[\"company\"][\"companyUuid\"]\r",
+									"\r",
+									"pm.collectionVariables.set(\"userUuid\", uuid)\r",
+									"pm.collectionVariables.set(\"userName\", name)\r",
+									"pm.collectionVariables.set(\"profile_uuid\", profileUuid)\r",
+									"pm.collectionVariables.set(\"company_uuid\", companyUuid)\r",
+									"\r",
+									"\r",
+									""
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "basic"
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"user\": {\r\n        \"username\": \"john_doe\",\r\n        \"email\": \"john_doe@email.com\",\r\n        \"password\": \"123456\"\r\n    },\r\n    \"profile\": {\r\n        \"name\": \"John\"\r\n    },\r\n    \"company\": {\r\n\r\n    }\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/register",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"register"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "RESET (Delete All Users)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"const response = pm.response.json() \r",
+									"\r",
+									"pm.test(\"Response to be empty\", () => {\r",
+									"    pm.expect(response).eql([])\r",
+									"})\r",
+									"\r",
+									"pm.environment.clear()\r",
+									"pm.collectionVariables.clear()\r",
+									"\r",
+									"const baseUrl = \"http://localhost:5000\"\r",
+									"pm.collectionVariables.set(\"baseUrl\", baseUrl)"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"password\": \"Nm1006357619!\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/delete/all/users",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"delete",
+								"all",
+								"users"
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"description": "Two users have different username but the same profile name. That makes their companies automatically have the same company name if they don't provide company name."
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "baseUrl",
+			"value": "http://localhost:5000",
+			"type": "string"
+		},
+		{
+			"key": "userUuid",
+			"value": ""
+		},
+		{
+			"key": "userName",
+			"value": ""
+		},
+		{
+			"key": "profile_uuid",
+			"value": ""
+		},
+		{
+			"key": "company_uuid",
+			"value": ""
+		}
+	]
+}

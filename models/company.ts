@@ -2,13 +2,16 @@
 import {
   DataTypes, Model, Optional
 } from 'sequelize'
+import slugify from 'slugify';
 import { sequelize } from "./index"
+import User from './user';
 
 interface CompanyAttributes {
     companyUuid: string
-    name: string
+    companyName: string
     logo: string
     slug: string
+    companyOwner: number
 }
 
 
@@ -21,16 +24,17 @@ interface CompanyCreationAttributes extends Optional<CompanyAttributes, "company
     implements CompanyAttributes {
     companyUuid!: string;
     id!: number
-    name!:string
+    companyName!:string
     logo!: string
     slug!: string
+    companyOwner!: number;
 
     public toJSON() {
         return {...
           this.get(), 
           id: undefined
         }
-    }
+    } 
   };
   Company.init({
     companyUuid: {
@@ -39,7 +43,7 @@ interface CompanyCreationAttributes extends Optional<CompanyAttributes, "company
       unique: true,
       allowNull: false
     },
-    name: {
+    companyName: {
       type: DataTypes.STRING,
       allowNull: false,
       unique: true
@@ -55,11 +59,31 @@ interface CompanyCreationAttributes extends Optional<CompanyAttributes, "company
         type: DataTypes.STRING,
         allowNull: false,
         unique: true
+    },
+    companyOwner: {
+      type: DataTypes.INTEGER,
+      allowNull: false
     }
   }, {
     sequelize,
     modelName: 'Company',
-    tableName: "companies"
+    tableName: "companies",
+    hooks: {
+      beforeValidate(company) {
+        company.slug = slugify(company.companyName, {lower: true})
+      }
+    }
   });
 
-  export = Company
+  Company.belongsTo(User, {
+    as: "owner",
+    foreignKey: "companyOwner",
+    onDelete: "CASCADE"
+  })
+  User.hasMany(Company, {
+    as: "ownedCompanies",
+    foreignKey: "companyOwner",
+    onDelete: "CASCADE"
+  })
+
+  export = Company 
