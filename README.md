@@ -181,4 +181,3 @@ Data sent while while creating company can also be updated.
 Send DELETE request to companies/:id where :id is company's uuid<br>
 
 User's company that he already created will not be deleted but user won't be able to create new company without profile.
-
